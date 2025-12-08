@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>fiorella - イラスト依頼・見積りサイト</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdf6e3;
+            --ink: #2d2926;
+            --accent: #e07b39;
+            --accent-light: #f4a261;
+            --cream: #fffef5;
+            --shadow: rgba(45, 41, 38, 0.12);
+            --glass: rgba(255, 255, 255, 0.65);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; color: var(--ink); background: var(--bg); overflow-x: hidden; line-height: 1.7; }
+        .hero { width: 100%; height: 300px; background: url("https://pbs.twimg.com/profile_banners/1721436588008415232/1749454873/1500x500") center/cover no-repeat; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, var(--bg), transparent); }
+        .nav { display: flex; justify-content: center; align-items: center; gap: 12px; background: var(--glass); backdrop-filter: saturate(180%) blur(12px); border-bottom: 2px solid var(--accent-light); padding: 12px 20px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+        .tab-btn { border: 3px solid var(--ink); border-radius: 25px; background: var(--cream); font-family: inherit; font-weight: 700; font-size: 15px; padding: 10px 24px; cursor: pointer; transition: all 0.25s; box-shadow: 4px 4px 0 var(--ink); }
+        .tab-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+        .tab-btn.active { background: var(--accent); color: var(--cream); }
+        .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+        .lang-btn, .price-toggle-btn { border: 2px solid var(--ink); border-radius: 20px; padding: 8px 16px; font-weight: 700; font-size: 13px; background: var(--cream); cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .lang-btn:hover, .price-toggle-btn:hover { background: var(--accent-light); }
+        .price-toggle-btn.active { background: var(--accent); color: white; }
+        .band { position: sticky; top: 62px; z-index: 90; background: var(--glass); backdrop-filter: saturate(180%) blur(12px); border-bottom: 2px solid var(--accent-light); display: flex; justify-content: center; align-items: center; padding: 16px 20px; gap: 16px; }
+        .bubble-icon { width: 70px; height: 70px; border-radius: 50%; border: 4px solid var(--accent); object-fit: cover; box-shadow: 0 4px 12px var(--shadow); cursor: pointer; transition: transform 0.2s; }
+        .bubble-icon:hover { transform: scale(1.05); }
+        .bubble { background: var(--cream); border: 3px solid var(--ink); border-radius: 30px; padding: 12px 24px; font-weight: 700; box-shadow: 4px 4px 0 var(--ink); max-width: 600px; }
+        .bubble a { color: var(--accent); text-decoration: none; }
+        .page { display: none; }
+        .page.active { display: block; }
+        main.page.active { display: flex; }
+        #gallery.active { display: grid; }
+        main.page { width: min(1200px, 95%); margin: 40px auto 120px; padding: 30px; gap: 30px; background: var(--glass); backdrop-filter: saturate(150%) blur(8px); border: 3px solid var(--ink); border-radius: 24px; box-shadow: 8px 8px 0 var(--ink); }
+        form { flex: 2; display: flex; flex-direction: column; gap: 20px; }
+        .field { background: var(--cream); border: 3px solid var(--ink); border-radius: 16px; padding: 20px; box-shadow: 4px 4px 0 var(--ink); }
+        .field h3 { margin: 0 0 14px; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .field h3::before { content: '◆'; font-size: 12px; }
+        label { display: inline-flex; align-items: center; margin: 6px 12px 6px 0; cursor: pointer; font-weight: 500; }
+        label input[type="radio"] { margin-right: 6px; accent-color: var(--accent); width: 18px; height: 18px; }
+        .price-text { display: none; }
+        body.show-prices .price-text { display: inline; }
+        textarea, input[type="text"], input[type="number"], select { width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-size: 15px; background: #fff; }
+        textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); }
+        textarea { min-height: 100px; resize: vertical; }
+        .template-buttons, .size-template-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+        .template-buttons button, .size-template-buttons button { border: 3px solid var(--ink); border-radius: 20px; background: #fff; font-family: inherit; font-weight: 700; font-size: 14px; padding: 12px 20px; cursor: pointer; transition: all 0.2s; box-shadow: 3px 3px 0 var(--ink); }
+        .template-buttons button:hover, .size-template-buttons button:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+        .template-buttons button.active, .size-template-buttons button.active { background: var(--accent); color: var(--cream); }
+        .size-template-buttons { margin-bottom: 12px; }
+        .size-template-buttons button { padding: 8px 14px; font-size: 12px; }
+        input[type="range"] { width: 100%; height: 8px; accent-color: var(--accent); cursor: pointer; }
+        .size-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .size-row label { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 6px; }
+        .size-note { font-size: 13px; color: #666; margin-top: 8px; }
+        .price-box { position: sticky; top: 160px; flex: 1; height: fit-content; background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%); border: 4px solid var(--ink); border-radius: 20px; padding: 24px; text-align: center; color: var(--cream); box-shadow: 6px 6px 0 var(--ink); }
+        .price-box h3 { font-size: 20px; margin-bottom: 8px; }
+        #price { font-size: 48px; font-weight: 900; margin: 12px 0 20px; text-shadow: 2px 2px 0 var(--ink); }
+        .reference-img { margin-top: 16px; background: var(--cream); border-radius: 16px; padding: 12px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .reference-img img { max-width: 100%; max-height: 320px; border-radius: 12px; box-shadow: 0 4px 16px var(--shadow); }
+        .reference-img .no-image { color: var(--ink); opacity: 0.5; font-size: 14px; }
+        #copyBtn { width: 100%; padding: 14px 24px; margin-top: 16px; border: 3px solid var(--ink); border-radius: 16px; background: var(--cream); color: var(--ink); font-family: inherit; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 4px 4px 0 var(--ink); }
+        #copyBtn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+        #gallery { width: min(1200px, 95%); margin: 40px auto 120px; background: var(--glass); backdrop-filter: saturate(150%) blur(8px); border: 3px solid var(--ink); border-radius: 24px; padding: 30px; box-shadow: 8px 8px 0 var(--ink); grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+        .gallery-item { position: relative; overflow: hidden; border: 3px solid var(--ink); border-radius: 16px; background: var(--cream); aspect-ratio: 1; box-shadow: 4px 4px 0 var(--ink); transition: all 0.25s; text-decoration: none; }
+        .gallery-item:hover { transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--ink); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .gallery-item:hover img { transform: scale(1.08); }
+        .gallery-caption { position: absolute; inset: auto 0 0 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); color: #fff; font-size: 13px; text-align: center; padding: 20px 8px 10px; opacity: 0; transition: opacity 0.25s; }
+        .gallery-item:hover .gallery-caption { opacity: 1; }
+        #sns { width: min(700px, 90%); margin: 40px auto 120px; background: var(--glass); backdrop-filter: saturate(150%) blur(8px); border: 3px solid var(--ink); border-radius: 24px; padding: 40px; box-shadow: 8px 8px 0 var(--ink); flex-direction: column; align-items: center; gap: 20px; }
+        #sns.active { display: flex; }
+        .sns-card { display: flex; align-items: center; gap: 20px; width: 100%; max-width: 400px; border: 3px solid var(--ink); border-radius: 50px; padding: 16px 28px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 18px; background: var(--cream); transition: all 0.25s; box-shadow: 4px 4px 0 var(--ink); }
+        .sns-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+        .sns-card img { width: 48px; height: 48px; border-radius: 50%; }
+        .sns-x:hover { background: #1da1f2; color: #fff; border-color: #1da1f2; }
+        .sns-skeb:hover { background: #00c9a7; color: #fff; border-color: #00c9a7; }
+        .sns-fanbox:hover { background: #ff7139; color: #fff; border-color: #ff7139; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--cream); border: 4px solid var(--ink); border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 8px 8px 0 var(--ink); }
+        .modal h2 { color: var(--accent); margin-bottom: 20px; text-align: center; }
+        .modal-section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px dashed #ddd; }
+        .modal-section h4 { color: var(--accent); margin-bottom: 12px; font-size: 14px; }
+        .modal-field { margin-bottom: 12px; }
+        .modal-field label { display: block; margin-bottom: 4px; font-weight: 700; font-size: 13px; }
+        .modal-field input { width: 100%; padding: 8px; border: 2px solid var(--ink); border-radius: 8px; font-family: inherit; font-size: 14px; }
+        .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 12px; border: 3px solid var(--ink); border-radius: 12px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
+        .modal-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+        .modal-btn.primary { background: var(--accent); color: var(--cream); }
+        .modal-btn.secondary { background: #ddd; color: var(--ink); }
+        .admin-indicator { display: none; position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 500; cursor: pointer; }
+        .admin-indicator.active { display: block; }
+        footer { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #888; }
+        @media (max-width: 900px) { main.page { flex-direction: column; } .price-box { position: relative; top: 0; } }
+        @media (max-width: 600px) { .nav { gap: 8px; padding: 10px; } .tab-btn { font-size: 13px; padding: 8px 16px; } .nav-right { margin-left: 0; width: 100%; justify-content: center; margin-top: 8px; } .band { flex-direction: column; text-align: center; } #price { font-size: 36px; } .modal-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="hero"></div>
+<nav class="nav">
+    <button class="tab-btn active" data-tab="estimate" data-i18n="tab_estimate">使用用途/お見積り</button>
+    <button class="tab-btn" data-tab="gallery" data-i18n="tab_gallery">実績/イラスト</button>
+    <button class="tab-btn" data-tab="sns" data-i18n="tab_sns">SNS</button>
+    <div class="nav-right">
+        <button class="price-toggle-btn" id="priceToggle">💰 <span data-i18n="show_price">料金表示</span></button>
+        <button class="lang-btn" id="langBtn">🌐 EN</button>
+    </div>
+</nav>
+<div class="band">
+    <img class="bubble-icon" src="https://pbs.twimg.com/profile_images/1931979756624556032/CEUOjHsN_400x400.jpg" alt="fiorella" id="profileIcon">
+    <div class="bubble"><span data-i18n="profile_text">メカクレとでこっぱち 🍮 個人依頼のみ</span> <a href="https://skeb.jp/@fiorella" target="_blank">https://skeb.jp/@fiorella</a></div>
+</div>
+<main class="page active" id="estimate">
+    <form id="estimateForm">
+        <div class="field"><h3 data-i18n="usage">使用用途</h3>
+            <div class="template-buttons" id="tplButtons">
+                <button type="button" data-template="icon" data-i18n="tpl_icon">アイコン</button>
+                <button type="button" data-template="thumb" data-i18n="tpl_thumb">サムネイラスト</button>
+                <button type="button" data-template="char" data-i18n="tpl_char">キャラデザ</button>
+                <button type="button" data-template="chibi" data-i18n="tpl_chibi">ちびキャラ</button>
+                <button type="button" data-template="henyo" data-i18n="tpl_henyo">へにょキャラ</button>
+                <button type="button" data-template="clothes" data-i18n="tpl_clothes">服デザイン</button>
+                <button type="button" data-template="analog" data-i18n="tpl_analog">アナログイラスト</button>
+            </div>
+        </div>
+        <div class="field"><h3 data-i18n="base">基本</h3>
+            <label><input type="radio" name="base" value="3000" data-basekey="face"> <span data-i18n="base_face">顔回り</span> <span class="price-text">(<span class="price-face">3000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="base" value="4000" data-basekey="bust"> <span data-i18n="base_bust">胸上</span> <span class="price-text">(<span class="price-bust">4000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="base" value="5000" data-basekey="knees"> <span data-i18n="base_knees">膝上</span> <span class="price-text">(<span class="price-knees">5000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="base" value="10000" data-basekey="full"> <span data-i18n="base_full">全身</span> <span class="price-text">(<span class="price-full">10000</span><span data-i18n="yen">円</span>)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="background">背景</h3>
+            <label><input type="radio" name="bg" value="0" data-bgkey="none"> <span data-i18n="bg_none">なし</span> <span class="price-text">(0<span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="bg" value="1000" data-bgkey="little"> <span data-i18n="bg_little">ちょっぴり</span> <span class="price-text">(<span class="price-bglittle">1000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="bg" value="2000" data-bgkey="much"> <span data-i18n="bg_much">かなり</span> <span class="price-text">(<span class="price-bgmuch">2000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="bg" value="3000" data-bgkey="full"> <span data-i18n="bg_full">がっつり</span> <span class="price-text">(<span class="price-bgfull">3000</span><span data-i18n="yen">円</span>)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="people">人数</h3>
+            <input type="range" min="1" max="5" value="1" id="peopleRange">
+            <p><span id="peopleCount">1</span> <span data-i18n="people_unit">人（人数分で倍掛け）</span></p>
+        </div>
+        <div class="field"><h3 data-i18n="revisions">リテイク回数</h3>
+            <label><input type="radio" name="rev" value="0" data-pricekey="rev0"> <span data-i18n="rev_3">3回まで</span> <span class="price-text">(0<span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="rev" value="1000" data-pricekey="rev5"> <span data-i18n="rev_5">5回まで</span> <span class="price-text">(+<span class="price-rev5">1000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="rev" value="3000" data-pricekey="revfree"> <span data-i18n="rev_free">フリー</span> <span class="price-text">(+<span class="price-revfree">3000</span><span data-i18n="yen">円</span>)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="commercial">商用利用</h3>
+            <label><input type="radio" name="commercial" value="0" checked> <span data-i18n="commercial_no">無し</span></label>
+            <label><input type="radio" name="commercial" value="0.5"> <span data-i18n="commercial_yes">有り (+50%)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="deadline">納期</h3>
+            <label><input type="radio" name="deadline" value="0" checked data-pricekey="ddl0"> <span data-i18n="ddl_2w">2週間</span> <span class="price-text">(0<span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="deadline" value="2000" data-pricekey="ddl1"> <span data-i18n="ddl_1m">1ヶ月</span> <span class="price-text">(+<span class="price-ddl1">2000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="deadline" value="4000" data-pricekey="ddl2"> <span data-i18n="ddl_2m">2ヶ月</span> <span class="price-text">(+<span class="price-ddl2">4000</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="deadline" value="-1000" data-pricekey="ddldiscount"> <span data-i18n="ddl_discount">おまかせ割引</span> <span class="price-text">(-<span class="price-ddldiscount">1000</span><span data-i18n="yen">円</span>)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="payment">お支払方法</h3>
+            <label><input type="radio" name="pay" value="0" checked data-pricekey="pay0"> <span data-i18n="pay_bank">銀行振込</span> <span class="price-text">(0<span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="pay" value="500" data-pricekey="kyash"> Kyash <span class="price-text">(+<span class="price-kyash">500</span><span data-i18n="yen">円</span>)</span></label>
+            <label><input type="radio" name="pay" value="1000" data-pricekey="paypal"> PayPal <span class="price-text">(+<span class="price-paypal">1000</span><span data-i18n="yen">円</span>)</span></label>
+        </div>
+        <div class="field"><h3 data-i18n="delivery_format">納品形式</h3>
+            <select id="delivery"><option value="PNG">PNG</option><option value="JPG">JPG</option><option value="PSD">PSD</option><option value="CLIP">CLIP</option><option value="その他">その他</option></select>
+        </div>
+        <div class="field"><h3 data-i18n="size">イラストサイズ</h3>
+            <div class="size-template-buttons" id="sizeTemplates">
+                <button type="button" data-size="1000x1000"><span data-i18n="size_icon">アイコン</span> (1000×1000)</button>
+                <button type="button" data-size="1920x1080"><span data-i18n="size_thumb">サムネ</span> (1920×1080)</button>
+                <button type="button" data-size="2000x2000"><span data-i18n="size_square">正方形</span> (2000×2000)</button>
+                <button type="button" data-size="2480x3508">A4 (2480×3508)</button>
+                <button type="button" data-size="custom"><span data-i18n="size_other">その他</span></button>
+            </div>
+            <div class="size-row" id="customSizeRow" style="display: none;">
+                <label><span data-i18n="size_h">縦(px)</span>：<input type="number" id="sizeH" min="1" placeholder="例 2000"></label>
+                <label><span data-i18n="size_w">横(px)</span>：<input type="number" id="sizeW" min="1" placeholder="例 2000"></label>
+            </div>
+            <div class="size-note" data-i18n="size_note">未入力の場合は標準サイズでの見積り。</div>
+        </div>
+        <div class="field"><h3 data-i18n="notes">備考</h3>
+            <textarea name="note" id="note" placeholder="ご希望の構図・参考URLなどをご記入ください"></textarea>
+        </div>
+    </form>
+    <div class="price-box">
+        <h3>💰 <span data-i18n="estimate_title">現在の概算</span></h3>
+        <div id="price">¥0</div>
+        <div class="reference-img" id="refImg"><span class="no-image" data-i18n="no_ref">参考画像がありません</span></div>
+        <button id="copyBtn">📧 <span data-i18n="copy_btn">依頼を送信</span></button>
+    </div>
+</main>
+<section class="page" id="gallery"></section>
+<section class="page" id="sns">
+    <!-- SNSカードはJavaScriptで動的に生成されます -->
+</section>
+<div class="admin-indicator" id="adminIndicator">🔧 <span data-i18n="admin_mode">管理者モード</span></div>
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+        <h2>🔐 <span data-i18n="admin_login">管理者ログイン</span></h2>
+        <div class="modal-field"><label data-i18n="password">パスワード</label><input type="password" id="adminPassword" placeholder="パスワードを入力"></div>
+        <div class="modal-buttons"><button class="modal-btn secondary" id="cancelLogin" data-i18n="cancel">キャンセル</button><button class="modal-btn primary" id="confirmLogin" data-i18n="login">ログイン</button></div>
+    </div>
+</div>
+<div class="modal-overlay" id="adminModal">
+    <div class="modal">
+        <h2>⚙️ <span data-i18n="price_settings">料金設定</span></h2>
+        <div class="modal-section"><h4>📐 基本料金</h4>
+            <div class="modal-row"><div class="modal-field"><label>顔回り（円）</label><input type="number" id="edit-face" value="3000"></div><div class="modal-field"><label>胸上（円）</label><input type="number" id="edit-bust" value="4000"></div></div>
+            <div class="modal-row"><div class="modal-field"><label>膝上（円）</label><input type="number" id="edit-knees" value="5000"></div><div class="modal-field"><label>全身（円）</label><input type="number" id="edit-full" value="10000"></div></div>
+        </div>
+        <div class="modal-section"><h4>🎨 背景料金</h4>
+            <div class="modal-row"><div class="modal-field"><label>ちょっぴり（円）</label><input type="number" id="edit-bglittle" value="1000"></div><div class="modal-field"><label>かなり（円）</label><input type="number" id="edit-bgmuch" value="2000"></div></div>
+            <div class="modal-field"><label>がっつり（円）</label><input type="number" id="edit-bgfull" value="3000"></div>
+        </div>
+        <div class="modal-section"><h4>⭐ 固定料金</h4>
+            <div class="modal-row"><div class="modal-field"><label>ちびキャラ（円）</label><input type="number" id="edit-chibi" value="3000"></div><div class="modal-field"><label>へにょキャラ（円）</label><input type="number" id="edit-henyo" value="500"></div></div>
+            <div class="modal-field"><label>服デザイン（円）</label><input type="number" id="edit-clothes" value="8000"></div>
+        </div>
+        <div class="modal-section"><h4>🎯 使用用途の固定価格設定</h4>
+            <p style="font-size:12px; color:#666; margin-bottom:12px;">チェックを入れると、その用途は基本料金ではなく固定価格で計算されます</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-icon"> アイコン
+                </label>
+                <div class="modal-field" style="margin:0;"><input type="number" id="edit-fixedIcon" value="3000" placeholder="固定価格"></div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-thumb"> サムネイラスト
+                </label>
+                <div class="modal-field" style="margin:0;"><input type="number" id="edit-fixedThumb" value="10000" placeholder="固定価格"></div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-char"> キャラデザ
+                </label>
+                <div class="modal-field" style="margin:0;"><input type="number" id="edit-fixedChar" value="15000" placeholder="固定価格"></div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-chibi" checked> ちびキャラ
+                </label>
+                <div style="font-size:12px; color:#666; padding:8px;">↑ 上の固定料金欄</div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-henyo" checked> へにょキャラ
+                </label>
+                <div style="font-size:12px; color:#666; padding:8px;">↑ 上の固定料金欄</div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-clothes" checked> 服デザイン
+                </label>
+                <div style="font-size:12px; color:#666; padding:8px;">↑ 上の固定料金欄</div>
+                <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:8px;">
+                    <input type="checkbox" id="fixed-analog"> アナログイラスト
+                </label>
+                <div class="modal-field" style="margin:0;"><input type="number" id="edit-fixedAnalog" value="5000" placeholder="固定価格"></div>
+            </div>
+        </div>
+        <div class="modal-section"><h4>🔄 リテイク料金</h4>
+            <div class="modal-row"><div class="modal-field"><label>5回まで（円）</label><input type="number" id="edit-rev5" value="1000"></div><div class="modal-field"><label>フリー（円）</label><input type="number" id="edit-revfree" value="3000"></div></div>
+        </div>
+        <div class="modal-section"><h4>📅 納期料金</h4>
+            <div class="modal-row"><div class="modal-field"><label>1ヶ月（円）</label><input type="number" id="edit-ddl1" value="2000"></div><div class="modal-field"><label>2ヶ月（円）</label><input type="number" id="edit-ddl2" value="4000"></div></div>
+            <div class="modal-field"><label>おまかせ割引（円）</label><input type="number" id="edit-ddldiscount" value="1000"></div>
+        </div>
+        <div class="modal-section"><h4>💳 支払方法手数料</h4>
+            <div class="modal-row"><div class="modal-field"><label>Kyash（円）</label><input type="number" id="edit-kyash" value="500"></div><div class="modal-field"><label>PayPal（円）</label><input type="number" id="edit-paypal" value="1000"></div></div>
+        </div>
+        <div class="modal-section"><h4>🖼️ 実績管理</h4>
+            <div class="modal-field"><label>画像URL</label><input type="text" id="add-gallery-image" placeholder="https://example.com/image.jpg"></div>
+            <div class="modal-field"><label>リンク先URL</label><input type="text" id="add-gallery-link" placeholder="https://example.com/work"></div>
+            <button class="modal-btn primary" id="addGalleryBtn" style="width:100%; margin-top:8px;">➕ 実績を追加</button>
+            <button class="modal-btn secondary" id="manageGalleryBtn" style="width:100%; margin-top:8px;">🗑️ 実績を削除・管理</button>
+        </div>
+        <div class="modal-section"><h4>🎨 参考画像設定</h4>
+            <div class="modal-field">
+                <label>設定する組み合わせ</label>
+                <select id="ref-select-key" style="width:100%; padding:8px; border:2px solid var(--ink); border-radius:8px; font-family:inherit;">
+                    <option value="">選択してください</option>
+                    <optgroup label="📌 通常（デジタル）">
+                        <option value="none-face">背景なし × 顔回り</option>
+                        <option value="none-bust">背景なし × 胸上</option>
+                        <option value="none-knees">背景なし × 膝上</option>
+                        <option value="none-full">背景なし × 全身</option>
+                        <option value="little-face">ちょっぴり × 顔回り</option>
+                        <option value="little-bust">ちょっぴり × 胸上</option>
+                        <option value="little-knees">ちょっぴり × 膝上</option>
+                        <option value="little-full">ちょっぴり × 全身</option>
+                        <option value="much-face">かなり × 顔回り</option>
+                        <option value="much-bust">かなり × 胸上</option>
+                        <option value="much-knees">かなり × 膝上</option>
+                        <option value="much-full">かなり × 全身</option>
+                        <option value="full-face">がっつり × 顔回り</option>
+                        <option value="full-bust">がっつり × 胸上</option>
+                        <option value="full-knees">がっつり × 膝上</option>
+                        <option value="full-full">がっつり × 全身</option>
+                    </optgroup>
+                    <optgroup label="🎨 アナログイラスト">
+                        <option value="analog-none-face">アナログ × 背景なし × 顔回り</option>
+                        <option value="analog-none-bust">アナログ × 背景なし × 胸上</option>
+                        <option value="analog-none-knees">アナログ × 背景なし × 膝上</option>
+                        <option value="analog-none-full">アナログ × 背景なし × 全身</option>
+                        <option value="analog-little-face">アナログ × ちょっぴり × 顔回り</option>
+                        <option value="analog-little-bust">アナログ × ちょっぴり × 胸上</option>
+                        <option value="analog-little-knees">アナログ × ちょっぴり × 膝上</option>
+                        <option value="analog-little-full">アナログ × ちょっぴり × 全身</option>
+                        <option value="analog-much-face">アナログ × かなり × 顔回り</option>
+                        <option value="analog-much-bust">アナログ × かなり × 胸上</option>
+                        <option value="analog-much-knees">アナログ × かなり × 膝上</option>
+                        <option value="analog-much-full">アナログ × かなり × 全身</option>
+                        <option value="analog-full-face">アナログ × がっつり × 顔回り</option>
+                        <option value="analog-full-bust">アナログ × がっつり × 胸上</option>
+                        <option value="analog-full-knees">アナログ × がっつり × 膝上</option>
+                        <option value="analog-full-full">アナログ × がっつり × 全身</option>
+                    </optgroup>
+                    <optgroup label="⭐ 固定料金">
+                        <option value="chibi">ちびキャラ</option>
+                        <option value="henyo">へにょキャラ</option>
+                        <option value="clothes">服デザイン</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="modal-field" style="margin-top:8px;">
+                <label>現在の参考画像</label>
+                <div id="current-ref-preview" style="text-align:center; padding:8px; background:#f5f5f5; border-radius:8px; min-height:60px;">
+                    <span style="color:#999; font-size:12px;">組み合わせを選択してください</span>
+                </div>
+            </div>
+            <button class="modal-btn secondary" id="selectFromGalleryBtn" style="width:100%; margin-top:8px;">📷 実績から選択</button>
+            <div class="modal-field" style="margin-top:8px;">
+                <label>または直接URLを入力</label>
+                <input type="text" id="ref-direct-url" placeholder="https://example.com/ref-image.jpg">
+            </div>
+            <button class="modal-btn primary" id="setRefImageBtn" style="width:100%; margin-top:8px;">✔️ 参考画像を設定</button>
+        </div>
+        <div class="modal-section"><h4>🔗 SNS設定</h4>
+            <p style="font-size:12px; color:#666; margin-bottom:12px;">各SNSのリンク・アイコン・表示名を設定できます</p>
+            <div id="sns-settings-container"></div>
+            <button class="modal-btn secondary" id="addSnsBtn" style="width:100%; margin-top:12px;">➕ SNSを追加</button>
+        </div>
+        <div class="modal-buttons"><button class="modal-btn secondary" id="cancelAdmin" data-i18n="close">閉じる</button><button class="modal-btn primary" id="saveAdmin" data-i18n="save">保存</button></div>
+    </div>
+</div>
+<footer>© fiorella - Illustration Commission Site</footer>
+<div class="modal-overlay" id="gallerySelectModal">
+    <div class="modal" style="max-width:700px;">
+        <h2>🖼️ 実績から参考画像を選択</h2>
+        <div id="gallery-select-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:8px; max-height:400px; overflow-y:auto; padding:8px;"></div>
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-btn secondary" id="cancelGallerySelect">キャンセル</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="galleryManageModal">
+    <div class="modal" style="max-width:800px;">
+        <h2>🗑️ 実績の削除・管理</h2>
+        <p style="font-size:13px; color:#666; margin-bottom:12px;">クリックして選択 → 「選択した実績を削除」で削除できます</p>
+        <div style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="modal-btn secondary" id="selectAllGallery" style="flex:none; padding:8px 16px;">全選択</button>
+            <button class="modal-btn secondary" id="deselectAllGallery" style="flex:none; padding:8px 16px;">選択解除</button>
+            <button class="modal-btn secondary" id="resetGalleryDefault" style="flex:none; padding:8px 16px;">🔄 デフォルトに戻す</button>
+        </div>
+        <div id="gallery-manage-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:8px; max-height:400px; overflow-y:auto; padding:8px; background:#f5f5f5; border-radius:8px;"></div>
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-btn secondary" id="cancelGalleryManage">キャンセル</button>
+            <button class="modal-btn primary" id="deleteSelectedGallery" style="background:#e74c3c;">🗑️ 選択した実績を削除</button>
+        </div>
+    </div>
+</div>
+<script>
+// 多言語対応
+const i18n = {
+    ja: {
+        tab_estimate: "使用用途/お見積り",
+        tab_gallery: "実績/イラスト",
+        tab_sns: "SNS",
+        show_price: "料金表示",
+        profile_text: "メカクレとでこっぱち 🍮 個人依頼のみ",
+        usage: "使用用途",
+        tpl_icon: "アイコン",
+        tpl_thumb: "サムネイラスト",
+        tpl_char: "キャラデザ",
+        tpl_chibi: "ちびキャラ",
+        tpl_henyo: "へにょキャラ",
+        tpl_clothes: "服デザイン",
+        tpl_analog: "アナログイラスト",
+        base: "基本",
+        base_face: "顔回り",
+        base_bust: "胸上",
+        base_knees: "膝上",
+        base_full: "全身",
+        yen: "円",
+        background: "背景",
+        bg_none: "なし",
+        bg_little: "ちょっぴり",
+        bg_much: "かなり",
+        bg_full: "がっつり",
+        people: "人数",
+        people_unit: "人（人数分で倍掛け）",
+        revisions: "リテイク回数",
+        rev_3: "3回まで",
+        rev_5: "5回まで",
+        rev_free: "フリー",
+        commercial: "商用利用",
+        commercial_no: "無し",
+        commercial_yes: "有り (+50%)",
+        deadline: "納期",
+        ddl_2w: "2週間",
+        ddl_1m: "1ヶ月",
+        ddl_2m: "2ヶ月",
+        ddl_discount: "おまかせ割引",
+        payment: "お支払方法",
+        pay_bank: "銀行振込",
+        delivery_format: "納品形式",
+        size: "イラストサイズ",
+        size_icon: "アイコン",
+        size_thumb: "サムネ",
+        size_square: "正方形",
+        size_other: "その他",
+        size_h: "縦(px)",
+        size_w: "横(px)",
+        size_note: "未入力の場合は標準サイズでの見積り。",
+        notes: "備考",
+        estimate_title: "現在の概算",
+        no_ref: "参考画像がありません",
+        copy_btn: "依頼を送信",
+        admin_mode: "管理者モード",
+        admin_login: "管理者ログイン",
+        password: "パスワード",
+        cancel: "キャンセル",
+        login: "ログイン",
+        price_settings: "料金設定",
+        close: "閉じる",
+        save: "保存",
+        copy_success: "コピーしました！",
+        login_success: "管理者モードでログインしました",
+        login_fail: "パスワードが違います",
+        save_success: "料金を保存しました！",
+        gallery_view: "作品を見る →"
+    },
+    en: {
+        tab_estimate: "Request / Estimate",
+        tab_gallery: "Portfolio",
+        tab_sns: "SNS",
+        show_price: "Show Prices",
+        profile_text: "Eye-covering hair & forehead 🍮 Personal commissions only",
+        usage: "Usage Type",
+        tpl_icon: "Icon",
+        tpl_thumb: "Thumbnail",
+        tpl_char: "Character Design",
+        tpl_chibi: "Chibi",
+        tpl_henyo: "Henyo",
+        tpl_clothes: "Outfit Design",
+        tpl_analog: "Traditional Art",
+        base: "Base",
+        base_face: "Face",
+        base_bust: "Bust",
+        base_knees: "Knee-up",
+        base_full: "Full Body",
+        yen: " JPY",
+        background: "Background",
+        bg_none: "None",
+        bg_little: "Simple",
+        bg_much: "Detailed",
+        bg_full: "Complex",
+        people: "Characters",
+        people_unit: " (price multiplied)",
+        revisions: "Revisions",
+        rev_3: "Up to 3",
+        rev_5: "Up to 5",
+        rev_free: "Unlimited",
+        commercial: "Commercial Use",
+        commercial_no: "No",
+        commercial_yes: "Yes (+50%)",
+        deadline: "Deadline",
+        ddl_2w: "2 Weeks",
+        ddl_1m: "1 Month",
+        ddl_2m: "2 Months",
+        ddl_discount: "Flexible (Discount)",
+        payment: "Payment Method",
+        pay_bank: "Bank Transfer",
+        delivery_format: "File Format",
+        size: "Illustration Size",
+        size_icon: "Icon",
+        size_thumb: "Thumbnail",
+        size_square: "Square",
+        size_other: "Other",
+        size_h: "Height(px)",
+        size_w: "Width(px)",
+        size_note: "Standard size if not specified.",
+        notes: "Notes",
+        estimate_title: "Estimated Price",
+        no_ref: "No reference image",
+        copy_btn: "Send Request",
+        admin_mode: "Admin Mode",
+        admin_login: "Admin Login",
+        password: "Password",
+        cancel: "Cancel",
+        login: "Login",
+        price_settings: "Price Settings",
+        close: "Close",
+        save: "Save",
+        copy_success: "Copied!",
+        login_success: "Logged in as admin",
+        login_fail: "Wrong password",
+        save_success: "Prices saved!",
+        gallery_view: "View Work →"
+    }
+};
+
+let currentLang = 'ja';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (i18n[lang][key]) {
+            el.textContent = i18n[lang][key];
+        }
+    });
+    document.getElementById('langBtn').textContent = lang === 'ja' ? '🌐 EN' : '🌐 JP';
+    renderGallery();
+}
+
+// ギャラリーデータ - デフォルト値
+var DEFAULT_GALLERY_DATA = [
+    {"image":"https://si.imgix.net/380347df/uploads/origins/fe932b9e-6c44-43fd-a7b5-2471841dd609?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=7eaf251f801b2bf14d1c570146afb391","link":"https://skeb.jp/@fiorella/works/1"},
+    {"image":"https://si.imgix.net/ea364b53/uploads/origins/bf044004-b40d-4d1d-bc20-ac59efcb0d81?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f6447671ec5998ac45e9936e784c5ef2","link":"https://skeb.jp/@fiorella/works/2"},
+    {"image":"https://si.imgix.net/b6c7445f/uploads/origins/cd92b94c-9ca3-40f1-b075-798fc2895216?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=fbaa617f3ec336bd3242ce88e747c646","link":"https://skeb.jp/@fiorella/works/3"},
+    {"image":"https://si.imgix.net/9283b8c1/uploads/origins/736c65cd-f197-45c0-822b-7725a235fdb4?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f43e4468afaa8583f230baba22fccf4e","link":"https://skeb.jp/@fiorella/works/4"},
+    {"image":"https://si.imgix.net/fe56ca8a/uploads/origins/02a22d86-7620-4fd9-aeb4-52a1c295079e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=d3e44c64252251681af03db4e9ba5400","link":"https://skeb.jp/@fiorella/works/5"},
+    {"image":"https://si.imgix.net/0e918d2e/uploads/origins/d21fd021-8194-4619-93f0-53f454966f3b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e1de5165250dbea14008ca004d94fc06","link":"https://skeb.jp/@fiorella/works/6"},
+    {"image":"https://si.imgix.net/f062c13e/uploads/origins/efd0c6c0-5d35-439c-88ca-3f70cffb24c3?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a690d95d5809763296a5641ab2d2fa81","link":"https://skeb.jp/@fiorella/works/7"},
+    {"image":"https://si.imgix.net/36182f08/uploads/origins/f5835767-1fac-4770-97d6-73bfda36c805?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=1c5b961cdbfe5711aa460abf4d7ec559","link":"https://skeb.jp/@fiorella/works/8"},
+    {"image":"https://si.imgix.net/7d92d83f/uploads/origins/4d765501-7263-4323-95f1-d3f0e0b73446?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=02f875ef146835d908f3cd5df3affae2","link":"https://skeb.jp/@fiorella/works/9"},
+    {"image":"https://si.imgix.net/5b08b1d6/uploads/origins/18e6ed69-6edd-4153-9d83-779b44d6f65e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c2a7d8a4f73d0137f21535fef25cd01c","link":"https://skeb.jp/@fiorella/works/10"},
+    {"image":"https://si.imgix.net/9b456e0a/uploads/origins/bbe88a17-ee22-410a-a62c-5e6e2d609e44?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=390d3cb63afe4664126abb65de294780","link":"https://skeb.jp/@fiorella/works/11"},
+    {"image":"https://si.imgix.net/38850404/uploads/origins/19c9e9fb-4fc9-49fd-b3e1-d4846ae7a9d8?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=17a45077165f972076c1f7c8172ce633","link":"https://skeb.jp/@fiorella/works/12"},
+    {"image":"https://si.imgix.net/f258e7d8/uploads/origins/03fff8fa-fbb8-451f-b76f-f9329bd94ae2?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a65b3ec67b7bfafb772ff9185a7801a6","link":"https://skeb.jp/@fiorella/works/13"},
+    {"image":"https://si.imgix.net/8b0b4f5f/uploads/origins/b25f9a8b-8119-488d-b20e-c0fc4e6960ed?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b13434d7550e0e4ee90b4ae8e1491a60","link":"https://skeb.jp/@fiorella/works/14"},
+    {"image":"https://si.imgix.net/1f85b07b/uploads/origins/423599ba-4f64-4737-8bb5-7d98dede7265?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=135071df3e06c1bc127bb86747b6a65d","link":"https://skeb.jp/@fiorella/works/15"},
+    {"image":"https://si.imgix.net/52ba4c2f/uploads/origins/e7ef814c-8012-4d54-b19e-e00a7f3c5ce7?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a2f31259b9991bd81f1f198661fc4c8b","link":"https://skeb.jp/@fiorella/works/16"},
+    {"image":"https://si.imgix.net/688cd739/uploads/origins/94ba909f-d4c3-4b09-9f0c-787defee202f?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=6e17759b1dfeafd4b3c099902d54da37","link":"https://skeb.jp/@fiorella/works/17"},
+    {"image":"https://si.imgix.net/a2baef0d/uploads/origins/2337619c-b45a-4ea0-972c-9b4fbfab0d45?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=06aa93bf335b6072ae2c2277602fe55a","link":"https://skeb.jp/@fiorella/works/18"},
+    {"image":"https://si.imgix.net/6b962d95/uploads/origins/1396724a-773c-4406-9828-7da303a29aa4?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=6badd4a094be8701d4c125eee1c3a00a","link":"https://skeb.jp/@fiorella/works/19"},
+    {"image":"https://si.imgix.net/50ac9f47/uploads/origins/f68a385c-8dd0-43eb-9d3f-7217b72fb8e6?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=695a8661dc130c26e917475a45870684","link":"https://skeb.jp/@fiorella/works/20"},
+    {"image":"https://si.imgix.net/21408c90/uploads/origins/1b459546-f743-4f04-afba-03b1a1bbf98b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=8489e33d0057a83712730420aa922ac7","link":"https://skeb.jp/@fiorella/works/21"},
+    {"image":"https://si.imgix.net/8d604099/uploads/origins/55c518d5-c96a-4c86-95a0-9ed08f59a3dc?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=81d3f1412d318b27e4e7e2a1263ae278","link":"https://skeb.jp/@fiorella/works/22"},
+    {"image":"https://si.imgix.net/92588b05/uploads/origins/1b6929c2-ed18-4f94-8277-7c0f4d950a35?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=1d089241827f95fc7176acbfbea68aec","link":"https://skeb.jp/@fiorella/works/23"},
+    {"image":"https://si.imgix.net/8ca76a98/uploads/origins/bb22b0ee-bb67-446a-a2cf-87e4e35a7ed5?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=26933f211743772e1393dfd217d42546","link":"https://skeb.jp/@fiorella/works/24"},
+    {"image":"https://si.imgix.net/f8e4441e/uploads/origins/1650e32a-2c03-4029-9934-6d8379707d75?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=8d3196b46eb6aeb0b4e17a37625618b7","link":"https://skeb.jp/@fiorella/works/27"},
+    {"image":"https://si.imgix.net/42d3b397/uploads/origins/80cd36dc-76f4-4778-8c09-0c66913911b6?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3fa294a386d41c580031989bb949a5b2","link":"https://skeb.jp/@fiorella/works/28"},
+    {"image":"https://si.imgix.net/9e0b73db/uploads/origins/18338097-3e6d-4aa2-9dd7-d4308b348ebf?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f05ff43f7fb403321b4b2830e7df0762","link":"https://skeb.jp/@fiorella/works/29"},
+    {"image":"https://si.imgix.net/437e4b3e/uploads/origins/fad53ac7-8eaa-4ac8-ba66-53f44615692f?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=dc9d1a82d1c2397b57f13c47961010ce","link":"https://skeb.jp/@fiorella/works/30"},
+    {"image":"https://si.imgix.net/35a36820/uploads/origins/591d8e20-b9bc-42a8-9e60-0e5dfc4d8c34?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=113cd21bb105094a374df176206d9cf0","link":"https://skeb.jp/@fiorella/works/31"},
+    {"image":"https://si.imgix.net/eda485d5/uploads/origins/469636c3-34de-477e-88e0-2c5c693910fd?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=4b157eefdfe93d1137e4b67a42c96191","link":"https://skeb.jp/@fiorella/works/32"},
+    {"image":"https://si.imgix.net/caa4947e/uploads/origins/d1bc1e3c-3615-4243-af23-aa3a7ec9028c?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=deb7dd8e8cfe611be7631ca7ad00e384","link":"https://skeb.jp/@fiorella/works/33"},
+    {"image":"https://si.imgix.net/aba6a822/uploads/origins/acfa0e50-5a00-4fb8-aa2b-7858f4044815?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b12ff29e7c1e486cc1f9000dd8cc33bf","link":"https://skeb.jp/@fiorella/works/34"},
+    {"image":"https://si.imgix.net/d9ad78dd/uploads/origins/fccf19cf-ba9b-495c-b5bb-b5bae74af9af?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=63b94f11fe2a15f8eb7e67c512fbb966","link":"https://skeb.jp/@fiorella/works/35"},
+    {"image":"https://si.imgix.net/c665f0f5/uploads/origins/61235765-6f11-4bca-9289-4671ee1393bd?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c4060768cbae89a92603b6633243a345","link":"https://skeb.jp/@fiorella/works/36"},
+    {"image":"https://si.imgix.net/6c69ef1d/uploads/origins/6ec83106-ad3f-4c57-b489-ca5de5dfbf0a?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=2ad0e7222e51c068c4a71dafb2127ce4","link":"https://skeb.jp/@fiorella/works/38"},
+    {"image":"https://si.imgix.net/af42de01/uploads/origins/0af9efff-2821-4f6b-8e2a-b226d1d3e1e1?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=eeeeee563d8434d8fdd3f37c5750a735","link":"https://skeb.jp/@fiorella/works/39"},
+    {"image":"https://si.imgix.net/af42de01/uploads/origins/0af9efff-2821-4f6b-8e2a-b226d1d3e1e1?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=eeeeee563d8434d8fdd3f37c5750a735","link":"https://skeb.jp/@fiorella/works/40"},
+    {"image":"https://si.imgix.net/3db088c8/uploads/origins/f0b8575a-c4a5-41b9-ac09-5a0fa814c129?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=cccb5c543a52d98194f2119cd25249da","link":"https://skeb.jp/@fiorella/works/41"},
+    {"image":"https://si.imgix.net/d952adce/uploads/origins/d6b5c10b-3edd-4981-af19-fe7df47ae669?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3a5e77a0ab3790587cfdd93ab2211c46","link":"https://skeb.jp/@fiorella/works/42"},
+    {"image":"https://si.imgix.net/202dbd15/uploads/origins/ca69c50f-3544-4b12-8fc3-2f0056f9efc1?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=68c15fa1a97003163fb261562a68a66e","link":"https://skeb.jp/@fiorella/works/43"},
+    {"image":"https://si.imgix.net/8e7f360d/uploads/origins/4e06a6ca-1b62-43d2-9b36-ccf253b599dd?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=4669bd70b84cea0023c4a58cede57f82","link":"https://skeb.jp/@fiorella/works/44"},
+    {"image":"https://si.imgix.net/d751c742/uploads/origins/e15e2b80-846f-4b34-aadd-e0b47b68c724?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=54c277477a1934d37983e36566a24668","link":"https://skeb.jp/@fiorella/works/45"},
+    {"image":"https://si.imgix.net/c9ff5f57/uploads/origins/b6aa5f8f-4499-4110-b7a1-a765dfdfa560?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c69629cbb13bb00b44425db2ede74e48","link":"https://skeb.jp/@fiorella/works/46"},
+    {"image":"https://si.imgix.net/211b3e81/uploads/origins/0e9f5144-7242-4023-8497-5c0bde6038a2?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=ca77f0cb044b6c4b3f149e72ab0f561b","link":"https://skeb.jp/@fiorella/works/47"},
+    {"image":"https://si.imgix.net/2c28b990/uploads/origins/1a501c65-c044-459d-b8f3-ce9442fe22af?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a61fe79c1428792d61a96b2061a88196","link":"https://skeb.jp/@fiorella/works/48"},
+    {"image":"https://si.imgix.net/562f0814/uploads/origins/c32ceff6-e955-4d8b-a5e2-59f554d83411?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=fae10119b68a078e17317a2e5615f8e2","link":"https://skeb.jp/@fiorella/works/49"},
+    {"image":"https://si.imgix.net/2c5a4329/uploads/origins/bb866105-6885-4f7f-8542-d7afb9fb1064?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b3a0f7387120141c80b8d26e05901aa3","link":"https://skeb.jp/@fiorella/works/51"},
+    {"image":"https://si.imgix.net/1b48410b/uploads/origins/fd1b35d6-ab76-4f5c-bca5-fc5c370e117c?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e1b58969a00099845d0c2cb424768793","link":"https://skeb.jp/@fiorella/works/52"},
+    {"image":"https://si.imgix.net/5b21db86/uploads/origins/c8bb178f-07d0-44db-bbd3-8d251744b052?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=432ba754880f6ea4fc0cf0fa48bab628","link":"https://skeb.jp/@fiorella/works/54"},
+    {"image":"https://si.imgix.net/a4c6bbac/uploads/origins/f6fd1139-48f9-4615-bec0-488f015245d9?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=1e2cb7ca7b822f62b60fc15f6fa4af0b","link":"https://skeb.jp/@fiorella/works/56"},
+    {"image":"https://si.imgix.net/e4ac1a5c/uploads/origins/e08540ef-a158-4d04-9592-9cd0fd2df9a7?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3a7cb28ceae5258e001ed98257ca55a9","link":"https://skeb.jp/@fiorella/works/57"},
+    {"image":"https://si.imgix.net/7badae62/uploads/origins/b39cedc7-3abf-427a-af31-c3555afed097?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=1f987d5022a35c4bffb4ee7c1ba91f12","link":"https://skeb.jp/@fiorella/works/58"},
+    {"image":"https://si.imgix.net/ecb73034/uploads/origins/f238b986-b830-40b4-974a-eb2a4892b02e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e1e35c1353ef12a9447be68fa10d83a6","link":"https://skeb.jp/@fiorella/works/59"},
+    {"image":"https://si.imgix.net/213357f1/uploads/origins/6e517304-73c5-4755-aed2-5f73e159ebfc?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e7a106575eb05b75eadec1c9491343f3","link":"https://skeb.jp/@fiorella/works/60"},
+    {"image":"https://si.imgix.net/a99c5c8c/uploads/origins/d6ec761a-1d73-44e3-aceb-ac7d616bdbc4?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e67319190aae436ddb82bfa9eb55bc2e","link":"https://skeb.jp/@fiorella/works/61"},
+    {"image":"https://si.imgix.net/f3da099f/uploads/origins/30aa30d0-f265-4a8d-932a-2fe57fc29191?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=1a3a38680296d8f226735cf42afe1787","link":"https://skeb.jp/@fiorella/works/62"},
+    {"image":"https://si.imgix.net/07bf617b/uploads/origins/d0ba9bd8-348c-4393-89c2-721ad21fe561?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b0610dfa065baf0f1b22b4814582c3c4","link":"https://skeb.jp/@fiorella/works/63"},
+    {"image":"https://si.imgix.net/0b954afb/uploads/origins/818f248b-3d5d-437d-b670-d700e3a16e98?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=567de9c9b2801bdbe1d29516d33e808c","link":"https://skeb.jp/@fiorella/works/65"},
+    {"image":"https://si.imgix.net/8c4bea4b/uploads/origins/12efd35f-c1cc-4686-befd-96d6bc927cb9?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=133d0ce437487d2760bb08f44af79a73","link":"https://skeb.jp/@fiorella/works/66"},
+    {"image":"https://si.imgix.net/9759f516/uploads/origins/3667e052-48a0-44f3-8eac-a85625c9469b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=022be33cece4dd2c1ce136014c916858","link":"https://skeb.jp/@fiorella/works/67"},
+    {"image":"https://si.imgix.net/5dfcd723/uploads/origins/0ab8c141-551d-4243-b659-c9b2250d4280?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=ddb089776af2d4e95e28622b0ba25aa7","link":"https://skeb.jp/@fiorella/works/68"},
+    {"image":"https://si.imgix.net/d9b314a9/uploads/origins/dbfbb29c-193d-422d-a81f-67cb2d15864e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=8233d4f0d0dac27f48581bc9fd2888a5","link":"https://skeb.jp/@fiorella/works/69"},
+    {"image":"https://si.imgix.net/357bdee4/uploads/origins/af935e82-95b6-4f0e-9254-2bd45dfff3f5?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=dbc3a609c50199155884c8516f1102b5","link":"https://skeb.jp/@fiorella/works/70"},
+    {"image":"https://si.imgix.net/5605719f/uploads/origins/42257ea1-d326-400e-ac76-f85f111b4d96?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=72aa807ecd63ca9f003e97e702032647","link":"https://skeb.jp/@fiorella/works/71"},
+    {"image":"https://si.imgix.net/d0f40c00/uploads/origins/04c18e52-203b-4e5b-ae91-d33a049e48ee?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=9d2baccdb9c3d3087f99141431a01f08","link":"https://skeb.jp/@fiorella/works/72"},
+    {"image":"https://si.imgix.net/c3b6e64b/uploads/origins/bc189107-057e-41d3-89a2-6e14d9e728ab?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=869fee3ec64f9b6f42fb9f590a347d65","link":"https://skeb.jp/@fiorella/works/73"},
+    {"image":"https://si.imgix.net/60ad7a48/uploads/origins/15c6ebff-b5f0-467e-840a-483b38a95e50?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3bbe46c3829ef8b5f8bb0f6dd951a4e7","link":"https://skeb.jp/@fiorella/works/74"},
+    {"image":"https://si.imgix.net/67ab027d/uploads/origins/eb4b599b-a3a3-4b5c-944d-bbb58fe2968b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c2b6df0b24199792aae4e0175988dd37","link":"https://skeb.jp/@fiorella/works/75"},
+    {"image":"https://si.imgix.net/5dd67310/uploads/origins/24b68b4a-2afb-47f5-a59e-b04e72b0b345?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=fd3f1132886e171059a9261fec85fc4a","link":"https://skeb.jp/@fiorella/works/76"},
+    {"image":"https://si.imgix.net/e677df3f/uploads/origins/0fedeb61-5ec7-45b3-85cd-ce6fcc869209?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=6dab1dc99906761e17bf66039f2f9c8d","link":"https://skeb.jp/@fiorella/works/77"},
+    {"image":"https://si.imgix.net/20aa8321/uploads/origins/908f2f14-8717-490e-8111-481a0f35af3b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=d8479a3a9974f513611d04aeb2537c4e","link":"https://skeb.jp/@fiorella/works/78"},
+    {"image":"https://si.imgix.net/15da993a/uploads/origins/4028eab3-cc36-4fbc-9553-2bb6d0e435f3?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=981554630d18e35be1857ae27f9b7e2c","link":"https://skeb.jp/@fiorella/works/79"},
+    {"image":"https://si.imgix.net/78ff04d3/uploads/origins/c1c35fe9-0d3b-4413-9bfa-9dd90b61bf37?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=4373e3929c4d00339aa559bcb3c22c67","link":"https://skeb.jp/@fiorella/works/80"},
+    {"image":"https://si.imgix.net/07ce8b29/uploads/origins/75c2f16b-3a5b-4a77-868d-f7d1e22706e6?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f4a05c7a8379f5693860369b87196de9","link":"https://skeb.jp/@fiorella/works/81"},
+    {"image":"https://si.imgix.net/3c4c164f/uploads/origins/0249309b-3011-4529-9cfd-40ac861014d8?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=49e30298342cb8480aa968924997ad39","link":"https://skeb.jp/@fiorella/works/82"},
+    {"image":"https://si.imgix.net/525c1d77/uploads/origins/851f35a0-edf0-49dc-a2ba-b3d7d58253b3?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=ec3d30cbf135a597e1371d0d8847a756","link":"https://skeb.jp/@fiorella/works/83"},
+    {"image":"https://si.imgix.net/3b1ac524/uploads/origins/550997b4-0f7b-4b09-8e88-f1952a0f2edc?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a098f1a33146d630051e4361e473e83b","link":"https://skeb.jp/@fiorella/works/84"},
+    {"image":"https://si.imgix.net/fa41f175/uploads/origins/c977dfcc-7523-4267-bb30-0de2540e4ce3?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=7cc258cbec19024bd33713ba7c51e908","link":"https://skeb.jp/@fiorella/works/85"},
+    {"image":"https://si.imgix.net/b5b47136/uploads/origins/8df76e16-da80-4682-bde4-366197c3595e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a2915c4106cffeacf32ddc4ed8ad8a1c","link":"https://skeb.jp/@fiorella/works/86"},
+    {"image":"https://si.imgix.net/3a6138c0/uploads/origins/a5cb24f1-e4f1-4b39-aff2-0fb3cda9e7d5?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=2f2385b620a70b583c86bb1dd9063c6c","link":"https://skeb.jp/@fiorella/works/87"},
+    {"image":"https://si.imgix.net/fd129210/uploads/origins/30dd6a2b-ebd5-4cf9-a268-1fa877505f75?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=74f3107fc9fa6ac26cc87262a4adb9e5","link":"https://skeb.jp/@fiorella/works/88"},
+    {"image":"https://si.imgix.net/781baae8/uploads/origins/0b3c820b-f8e8-41b9-b5fe-a3fb9dcfb126?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=d3d9b059b3b39c3d77c61d13a0412064","link":"https://skeb.jp/@fiorella/works/89"},
+    {"image":"https://si.imgix.net/d2f0869f/uploads/origins/7e9a9f1d-1b68-4cf4-8a78-f752f86b9099?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=2b8f15965828a03cf1ba70477ee30d61","link":"https://skeb.jp/@fiorella/works/91"},
+    {"image":"https://si.imgix.net/be7e5f7a/uploads/origins/6a3bf5c8-c586-41bb-83b6-2ced6b97e75a?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f194e4f798c15d0d0e104b7a13ad53e4","link":"https://skeb.jp/@fiorella/works/92"},
+    {"image":"https://si.imgix.net/8a2a3137/uploads/origins/101aabf4-8a28-4a1a-ac0a-a6137edae213?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=77065100e5e532721630a930ddb17103","link":"https://skeb.jp/@fiorella/works/93"},
+    {"image":"https://si.imgix.net/765b1311/uploads/origins/e0d50ead-87fb-436b-9873-1f87e45a0657?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b9d3457f705d7dd8f59abd339a58f36f","link":"https://skeb.jp/@fiorella/works/94"},
+    {"image":"https://si.imgix.net/dcac4f2d/uploads/origins/329fcee9-4da7-4de9-9140-85aa5e7ea3e5?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=bdcd738dd762fdb00fed1577a106c1fc","link":"https://skeb.jp/@fiorella/works/95"},
+    {"image":"https://si.imgix.net/d4418f91/uploads/origins/0726441c-844a-4f2b-94cc-c3b6edcf5d7d?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=97542a0bf58fbe7b196b787d7cb21fe1","link":"https://skeb.jp/@fiorella/works/98"},
+    {"image":"https://si.imgix.net/496aa131/uploads/origins/30527ee6-268d-49b4-8d08-3a650f8194ed?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=e2cdfd75fcdcc253044fca00e2ca4337","link":"https://skeb.jp/@fiorella/works/99"},
+    {"image":"https://si.imgix.net/604fdd82/uploads/origins/1687d9c9-b3e6-4cfb-8e22-4429ebd5fe18?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=f5753562ce4300d6e0174c2229850588","link":"https://skeb.jp/@fiorella/works/101"},
+    {"image":"https://si.imgix.net/44989b2d/uploads/origins/adf20d4c-a75e-4ab3-89c5-ce763d8efecd?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=781912f2338b531dc208f3a39a329744","link":"https://skeb.jp/@fiorella/works/102"},
+    {"image":"https://si.imgix.net/33f4d0d8/uploads/origins/3c7bcb39-c9c4-45a4-ae6e-25e08443e666?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c64162ea8a6fbc647763505e208798a5","link":"https://skeb.jp/@fiorella/works/104"},
+    {"image":"https://si.imgix.net/0a1eb05a/uploads/origins/b02c4f15-0bed-4d9f-bcec-4721c8c4bb12?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=357da5a3b677de1137b5c9cc4880f133","link":"https://skeb.jp/@fiorella/works/106"},
+    {"image":"https://si.imgix.net/50b51e45/uploads/origins/7132fb40-5568-4a96-800f-9d11e831b6a5?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c1080fcc748367e8ea7f1b6b4a77de95","link":"https://skeb.jp/@fiorella/works/107"},
+    {"image":"https://si.imgix.net/341c834e/uploads/origins/86682cd3-e6c8-4507-8434-cb3f46f200bf?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=36a70f1002c72dc2365da07d52a4b354","link":"https://skeb.jp/@fiorella/works/108"},
+    {"image":"https://si.imgix.net/8dc034d7/uploads/origins/c958d260-7f13-48b6-b8b6-0f582fd209ff?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=5e3f982092c959df487cedf60b49b9e7","link":"https://skeb.jp/@fiorella/works/109"},
+    {"image":"https://si.imgix.net/67f967cd/uploads/origins/c012cb41-65cc-460b-ba82-9793ad44937f?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=57bfe51555e735b871e1b7319431e6f9","link":"https://skeb.jp/@fiorella/works/110"},
+    {"image":"https://si.imgix.net/b303a40e/uploads/origins/3d1c3b67-c91e-4064-bbca-79ad47333960?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=aa92d3778535b418a9fc8055441aa22d","link":"https://skeb.jp/@fiorella/works/111"},
+    {"image":"https://si.imgix.net/9fc5fb22/uploads/origins/5e96b420-879d-454d-8293-8006d9c546b8?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=c77cea51bdfd9616f154e4edffd11203","link":"https://skeb.jp/@fiorella/works/113"},
+    {"image":"https://si.imgix.net/a260550d/uploads/origins/0c4ef13b-ab6a-4aa9-b66a-729561ea6881?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3b7864c61cf5e6e479b512f94905f7d8","link":"https://skeb.jp/@fiorella/works/115"},
+    {"image":"https://si.imgix.net/0abd5e25/uploads/origins/c9e32439-ce8a-4710-983c-9d22c74f8bf4?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=49c6a083bae95ed81312a0a6068bc3f7","link":"https://skeb.jp/@fiorella/works/116"},
+    {"image":"https://si.imgix.net/9ec612cb/uploads/origins/7a3ce30b-9c76-41dd-b74e-ca9e4d9d2388?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=cf2f477b664fb0ca84d475e9ac778510","link":"https://skeb.jp/@fiorella/works/117"},
+    {"image":"https://si.imgix.net/61772fa8/uploads/origins/d3d0d8a1-5e24-4391-9c9d-1c83944ad975?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=51bea34d24562e6920a687eb486332f2","link":"https://skeb.jp/@fiorella/works/118"},
+    {"image":"https://si.imgix.net/2c005e41/uploads/origins/818153fc-a415-49d1-908c-5b599792568d?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=8cb1427bc260c729f69934994cdfc0ac","link":"https://skeb.jp/@fiorella/works/119"},
+    {"image":"https://si.imgix.net/8861d768/uploads/origins/96a34ff1-d85b-4edf-bdae-79354b156400?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=ada81b59d84ea54fd25e15350fd9f379","link":"https://skeb.jp/@fiorella/works/120"},
+    {"image":"https://si.imgix.net/b4f8ae6a/uploads/origins/5d532022-bf48-4a2b-b7bf-d30c5ab3db9f?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=687a490ccbb4e1f2cf656173901e733f","link":"https://skeb.jp/@fiorella/works/121"},
+    {"image":"https://si.imgix.net/72d9b78b/uploads/origins/2500c5a5-b7eb-45a9-b47f-e1a0553c0daf?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=aa84f9d57b5ff9b0a5595471ecc23fc9","link":"https://skeb.jp/@fiorella/works/122"},
+    {"image":"https://si.imgix.net/ef35f48b/uploads/origins/b7230fb9-b422-411e-8b39-79d1b73690be?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=5e522bf2328d8cb19cc745e6fef538b0","link":"https://skeb.jp/@fiorella/works/123"},
+    {"image":"https://si.imgix.net/ff11216f/uploads/origins/19a0b36e-195b-40a1-ba57-fecb17a6b82b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=679d8ac592c1de01775b71d4ec13a0f9","link":"https://skeb.jp/@fiorella/works/124"},
+    {"image":"https://si.imgix.net/c9928238/uploads/origins/653141c4-581b-4615-b605-7cf2f917d19d?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=a0e9f22d3440b017bf9435e99d26cdfd","link":"https://skeb.jp/@fiorella/works/126"},
+    {"image":"https://si.imgix.net/3c27b2b5/uploads/origins/a4f0ac6e-9f35-466a-a971-fe648d54327d?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=3e25a53312c5b17ca99a411e5e8fbf35","link":"https://skeb.jp/@fiorella/works/127"},
+    {"image":"https://si.imgix.net/7f0451ce/uploads/origins/296ea486-f0f8-4b72-a09a-b4c71e34096e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=6ca8626df08f094341dc19738f9d6e43","link":"https://skeb.jp/@fiorella/works/130"},
+    {"image":"https://si.imgix.net/1275282e/uploads/origins/451ef3df-15e3-45c4-9398-d879d418f398?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=fa7c5ca6dbec2cb4e075a5bbbfede3e7","link":"https://skeb.jp/@fiorella/works/131"},
+    {"image":"https://si.imgix.net/f7de129f/uploads/origins/307a2d0e-d19f-4b57-882e-bf783cb3d1a7?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=2080b53bd70471ef401e92ba005d8f86","link":"https://skeb.jp/@fiorella/works/133"},
+    {"image":"https://si.imgix.net/eb6e3885/uploads/origins/83b165bb-f108-4730-8311-7a5aa9b4364b?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=aefb991029e7c9e45355e70927a10317","link":"https://skeb.jp/@fiorella/works/134"},
+    {"image":"https://si.imgix.net/191794c0/uploads/origins/02a2759b-e222-44f1-ae63-cc2b548cfecc?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=b87744f0a48acce6007b10706f8759f4","link":"https://skeb.jp/@fiorella/works/135"},
+    {"image":"https://si.imgix.net/acef0bac/uploads/origins/078dcaf3-8275-43c3-b3dc-181dc0c619b2?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=4865877d304a15b84713a84575903cde","link":"https://skeb.jp/@fiorella/works/138"},
+    {"image":"https://si.imgix.net/cc57c66e/uploads/origins/4f653ed2-f9ab-4d20-9672-96fd3f62fe9e?bg=%23fff&auto=format%2Ccompress&fm=webp&dpr=2&fit=crop&crop=top&w=200&h=200&s=0cb1e6628b85f1c68c50328b53473894","link":"https://skeb.jp/@fiorella/works/139"}
+];
+
+// 実際に使用するギャラリーデータ（localStorageから読み込み可能）
+var GALLERY_DATA = JSON.parse(JSON.stringify(DEFAULT_GALLERY_DATA));
+
+// 参考画像テーブル - デフォルト値
+var DEFAULT_REF_TABLE = {
+    "none-face": null,
+    "none-bust": "https://si.imgix.net/21408c90/uploads/origins/1b459546-f743-4f04-afba-03b1a1bbf98b?auto=format",
+    "none-knees": null,
+    "none-full": "https://pbs.twimg.com/media/GiQBqYXaAAALixu?format=jpg&name=large",
+    "little-face": "https://pbs.twimg.com/media/GtQSvZ0akAANV6G?format=jpg&name=medium",
+    "little-bust": null,
+    "little-knees": "https://si.imgix.net/d751c742/uploads/origins/e15e2b80-846f-4b34-aadd-e0b47b68c724?auto=format",
+    "little-full": "https://si.imgix.net/aba6a822/uploads/origins/acfa0e50-5a00-4fb8-aa2b-7858f4044815?auto=format",
+    "much-face": null,
+    "much-bust": "https://pbs.twimg.com/media/GtaZPQxbgAAZ-fQ?format=jpg&name=large",
+    "much-knees": "https://pbs.twimg.com/media/Gs-cT8IaYAAGqL3?format=jpg&name=large",
+    "much-full": "https://si.imgix.net/213357f1/uploads/origins/6e517304-73c5-4755-aed2-5f73e159ebfc?auto=format",
+    "full-face": null,
+    "full-bust": null,
+    "full-knees": "https://pbs.twimg.com/media/G1RIeycasAArIdg?format=jpg&name=4096x4096",
+    "full-full": "https://si.imgix.net/42d3b397/uploads/origins/80cd36dc-76f4-4778-8c09-0c66913911b6?auto=format",
+    // アナログイラスト
+    "analog-none-face": null,
+    "analog-none-bust": null,
+    "analog-none-knees": null,
+    "analog-none-full": null,
+    "analog-little-face": null,
+    "analog-little-bust": null,
+    "analog-little-knees": null,
+    "analog-little-full": null,
+    "analog-much-face": null,
+    "analog-much-bust": null,
+    "analog-much-knees": null,
+    "analog-much-full": null,
+    "analog-full-face": null,
+    "analog-full-bust": null,
+    "analog-full-knees": null,
+    "analog-full-full": null,
+    // 固定料金タイプ
+    "chibi": "https://pbs.twimg.com/media/GmYVeLUbwAAfGQL?format=jpg&name=medium",
+    "henyo": "https://pbs.twimg.com/media/GDUAOKhbIAAcCTQ?format=png&name=360x360",
+    "clothes": null
+};
+
+// 実際に使用する参考画像テーブル（localStorageから読み込み可能）
+var refTable = JSON.parse(JSON.stringify(DEFAULT_REF_TABLE));
+
+// デフォルト料金
+var DEFAULT_PRICES = {
+    face: 3000, bust: 4000, knees: 5000, full: 10000,
+    bglittle: 1000, bgmuch: 2000, bgfull: 3000,
+    chibi: 3000, henyo: 500, clothes: 8000,
+    rev5: 1000, revfree: 3000,
+    ddl1: 2000, ddl2: 4000, ddldiscount: 1000,
+    kyash: 500, paypal: 1000,
+    // 使用用途別の固定価格
+    fixedIcon: 3000, fixedThumb: 10000, fixedChar: 15000, fixedAnalog: 5000
+};
+
+// 使用用途の固定価格設定（trueなら固定価格、falseなら通常計算）
+var DEFAULT_FIXED_SETTINGS = {
+    icon: false,
+    thumb: false,
+    char: false,
+    chibi: true,
+    henyo: true,
+    clothes: true,
+    analog: false
+};
+
+var fixedSettings = JSON.parse(JSON.stringify(DEFAULT_FIXED_SETTINGS));
+
+// デフォルトのSNSデータ
+var DEFAULT_SNS_DATA = [
+    { id: 'x', name: 'Twitter (X)', url: 'https://x.com/rocomoconeko', icon: 'https://upload.wikimedia.org/wikipedia/commons/5/53/X_logo_2023_original.svg', color: '#1da1f2' },
+    { id: 'skeb', name: 'Skeb', url: 'https://skeb.jp/@fiorella', icon: 'https://skeb.jp/favicon.ico', color: '#00c9a7' },
+    { id: 'fanbox', name: 'Pixiv Fanbox', url: 'https://fiorella.fanbox.cc/', icon: 'https://pixiv.net/favicon.ico', color: '#ff7139' }
+];
+
+var SNS_DATA = JSON.parse(JSON.stringify(DEFAULT_SNS_DATA));
+
+// 状態管理
+var isAdmin = false;
+var prices = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+var showPrices = false;
+var fixedTemplate = null;
+
+// 管理者ログイン用
+var tripleClickCount = 0;
+var tripleClickTimer = null;
+var awaitingKeyCombo = false;
+var keyComboTimer = null;
+
+// LocalStorageから料金読み込み
+function loadPrices() {
+    var saved = localStorage.getItem('fio_prices');
+    if (saved) {
+        try {
+            var parsed = JSON.parse(saved);
+            for (var key in parsed) {
+                prices[key] = parsed[key];
+            }
+        } catch (e) {}
+    }
+    // 固定価格設定をロード
+    var savedFixed = localStorage.getItem('fio_fixedSettings');
+    if (savedFixed) {
+        try {
+            var parsedFixed = JSON.parse(savedFixed);
+            for (var key in parsedFixed) {
+                fixedSettings[key] = parsedFixed[key];
+            }
+        } catch (e) {}
+    }
+    updatePriceDisplay();
+}
+
+// LocalStorageからギャラリーデータ読み込み
+function loadGalleryData() {
+    var saved = localStorage.getItem('fio_gallery');
+    if (saved) {
+        try {
+            GALLERY_DATA = JSON.parse(saved);
+        } catch (e) {
+            GALLERY_DATA = JSON.parse(JSON.stringify(DEFAULT_GALLERY_DATA));
+        }
+    }
+}
+
+// LocalStorageから参考画像テーブル読み込み
+function loadRefTable() {
+    var saved = localStorage.getItem('fio_refTable');
+    if (saved) {
+        try {
+            var parsed = JSON.parse(saved);
+            for (var key in parsed) {
+                refTable[key] = parsed[key];
+            }
+        } catch (e) {}
+    }
+}
+
+// LocalStorageからSNSデータ読み込み
+function loadSnsData() {
+    var saved = localStorage.getItem('fio_snsData');
+    if (saved) {
+        try {
+            SNS_DATA = JSON.parse(saved);
+        } catch (e) {
+            SNS_DATA = JSON.parse(JSON.stringify(DEFAULT_SNS_DATA));
+        }
+    }
+}
+
+// SNSデータ保存
+function saveSnsData() {
+    localStorage.setItem('fio_snsData', JSON.stringify(SNS_DATA));
+}
+
+// SNSカード描画
+function renderSnsCards() {
+    var container = document.getElementById('sns');
+    container.innerHTML = '';
+    
+    SNS_DATA.forEach(function(item, index) {
+        var a = document.createElement('a');
+        a.className = 'sns-card';
+        a.href = item.url;
+        a.target = '_blank';
+        a.style.cssText = '--hover-color:' + item.color + ';';
+        a.innerHTML = '<img src="' + item.icon + '" alt="' + item.name + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%23ccc%22/></svg>\'"> ' + item.name;
+        
+        // ホバー時の色変更
+        a.addEventListener('mouseenter', function() {
+            this.style.background = item.color;
+            this.style.color = '#fff';
+            this.style.borderColor = item.color;
+        });
+        a.addEventListener('mouseleave', function() {
+            this.style.background = '';
+            this.style.color = '';
+            this.style.borderColor = '';
+        });
+        
+        container.appendChild(a);
+    });
+}
+
+// SNS設定UIを描画（管理者モーダル用）
+function renderSnsSettings() {
+    var container = document.getElementById('sns-settings-container');
+    container.innerHTML = '';
+    
+    SNS_DATA.forEach(function(item, index) {
+        var div = document.createElement('div');
+        div.style.cssText = 'background:#f5f5f5; border-radius:12px; padding:12px; margin-bottom:12px; position:relative;';
+        div.innerHTML = 
+            '<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">' +
+                '<img src="' + item.icon + '" style="width:32px; height:32px; border-radius:50%; border:2px solid var(--ink);" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%23ccc%22/></svg>\'">' +
+                '<strong style="flex:1;">' + item.name + '</strong>' +
+                '<button type="button" class="sns-delete-btn" data-index="' + index + '" style="background:#e74c3c; color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-weight:bold;">×</button>' +
+            '</div>' +
+            '<div class="modal-field" style="margin-bottom:8px;"><label style="font-size:12px;">表示名</label><input type="text" class="sns-name" data-index="' + index + '" value="' + item.name + '"></div>' +
+            '<div class="modal-field" style="margin-bottom:8px;"><label style="font-size:12px;">リンクURL</label><input type="text" class="sns-url" data-index="' + index + '" value="' + item.url + '"></div>' +
+            '<div class="modal-field" style="margin-bottom:8px;"><label style="font-size:12px;">アイコンURL</label><input type="text" class="sns-icon" data-index="' + index + '" value="' + item.icon + '"></div>' +
+            '<div class="modal-field"><label style="font-size:12px;">ホバー色</label><input type="color" class="sns-color" data-index="' + index + '" value="' + item.color + '" style="width:60px; height:30px; padding:0; border:2px solid var(--ink); border-radius:4px;"></div>';
+        container.appendChild(div);
+    });
+    
+    // 削除ボタンのイベント
+    container.querySelectorAll('.sns-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-index'));
+            if (confirm('「' + SNS_DATA[idx].name + '」を削除しますか？')) {
+                SNS_DATA.splice(idx, 1);
+                renderSnsSettings();
+            }
+        });
+    });
+    
+    // 入力変更時にデータを更新
+    container.querySelectorAll('.sns-name').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var idx = parseInt(this.getAttribute('data-index'));
+            SNS_DATA[idx].name = this.value;
+        });
+    });
+    container.querySelectorAll('.sns-url').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var idx = parseInt(this.getAttribute('data-index'));
+            SNS_DATA[idx].url = this.value;
+        });
+    });
+    container.querySelectorAll('.sns-icon').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var idx = parseInt(this.getAttribute('data-index'));
+            SNS_DATA[idx].icon = this.value;
+        });
+    });
+    container.querySelectorAll('.sns-color').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var idx = parseInt(this.getAttribute('data-index'));
+            SNS_DATA[idx].color = this.value;
+        });
+    });
+}
+
+// ギャラリーデータ保存
+function saveGalleryData() {
+    localStorage.setItem('fio_gallery', JSON.stringify(GALLERY_DATA));
+}
+
+// 参考画像テーブル保存
+function saveRefTable() {
+    localStorage.setItem('fio_refTable', JSON.stringify(refTable));
+}
+
+// 料金表示を更新
+function updatePriceDisplay() {
+    // 表示テキスト更新
+    document.querySelectorAll('.price-face').forEach(function(el) { el.textContent = prices.face; });
+    document.querySelectorAll('.price-bust').forEach(function(el) { el.textContent = prices.bust; });
+    document.querySelectorAll('.price-knees').forEach(function(el) { el.textContent = prices.knees; });
+    document.querySelectorAll('.price-full').forEach(function(el) { el.textContent = prices.full; });
+    document.querySelectorAll('.price-bglittle').forEach(function(el) { el.textContent = prices.bglittle; });
+    document.querySelectorAll('.price-bgmuch').forEach(function(el) { el.textContent = prices.bgmuch; });
+    document.querySelectorAll('.price-bgfull').forEach(function(el) { el.textContent = prices.bgfull; });
+    document.querySelectorAll('.price-rev5').forEach(function(el) { el.textContent = prices.rev5; });
+    document.querySelectorAll('.price-revfree').forEach(function(el) { el.textContent = prices.revfree; });
+    document.querySelectorAll('.price-ddl1').forEach(function(el) { el.textContent = prices.ddl1; });
+    document.querySelectorAll('.price-ddl2').forEach(function(el) { el.textContent = prices.ddl2; });
+    document.querySelectorAll('.price-ddldiscount').forEach(function(el) { el.textContent = prices.ddldiscount; });
+    document.querySelectorAll('.price-kyash').forEach(function(el) { el.textContent = prices.kyash; });
+    document.querySelectorAll('.price-paypal').forEach(function(el) { el.textContent = prices.paypal; });
+    
+    // ラジオボタンのvalue属性も更新（計算用）- 基本
+    document.querySelectorAll('input[name="base"]').forEach(function(el) {
+        var key = el.getAttribute('data-basekey');
+        if (key === 'face') el.value = prices.face;
+        else if (key === 'bust') el.value = prices.bust;
+        else if (key === 'knees') el.value = prices.knees;
+        else if (key === 'full') el.value = prices.full;
+    });
+    
+    // 背景
+    document.querySelectorAll('input[name="bg"]').forEach(function(el) {
+        var key = el.getAttribute('data-bgkey');
+        if (key === 'little') el.value = prices.bglittle;
+        else if (key === 'much') el.value = prices.bgmuch;
+        else if (key === 'full') el.value = prices.bgfull;
+    });
+    
+    // リテイク
+    document.querySelectorAll('input[name="rev"]').forEach(function(el) {
+        var key = el.getAttribute('data-pricekey');
+        if (key === 'rev5') el.value = prices.rev5;
+        else if (key === 'revfree') el.value = prices.revfree;
+    });
+    
+    // 納期
+    document.querySelectorAll('input[name="deadline"]').forEach(function(el) {
+        var key = el.getAttribute('data-pricekey');
+        if (key === 'ddl1') el.value = prices.ddl1;
+        else if (key === 'ddl2') el.value = prices.ddl2;
+        else if (key === 'ddldiscount') el.value = -prices.ddldiscount;
+    });
+    
+    // 支払方法
+    document.querySelectorAll('input[name="pay"]').forEach(function(el) {
+        var key = el.getAttribute('data-pricekey');
+        if (key === 'kyash') el.value = prices.kyash;
+        else if (key === 'paypal') el.value = prices.paypal;
+    });
+}
+
+// ギャラリー描画
+function renderGallery() {
+    var gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+    GALLERY_DATA.forEach(function(item) {
+        var a = document.createElement('a');
+        a.href = item.link;
+        a.target = '_blank';
+        a.className = 'gallery-item';
+        var img = document.createElement('img');
+        img.src = item.image;
+        img.alt = '作品';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.crossOrigin = 'anonymous';
+        var caption = document.createElement('div');
+        caption.className = 'gallery-caption';
+        caption.textContent = i18n[currentLang].gallery_view;
+        a.appendChild(img);
+        a.appendChild(caption);
+        gallery.appendChild(a);
+    });
+}
+
+// 見積り計算
+var form = document.getElementById('estimateForm');
+var priceEl = document.getElementById('price');
+var refImg = document.getElementById('refImg');
+var peopleRange = document.getElementById('peopleRange');
+var peopleCount = document.getElementById('peopleCount');
+
+function getChecked(name) {
+    return form.querySelector('input[name="' + name + '"]:checked');
+}
+
+function setRadioByKey(group, key) {
+    var inputs = form.querySelectorAll('input[name="' + group + '"]');
+    inputs.forEach(function(el) {
+        if (el.getAttribute('data-bgkey') === key || el.getAttribute('data-basekey') === key) {
+            el.checked = true;
+        }
+    });
+}
+
+function setRadio(name, val) {
+    var inputs = form.querySelectorAll('input[name="' + name + '"]');
+    inputs.forEach(function(el) {
+        if (el.value === String(val)) {
+            el.checked = true;
+        }
+    });
+}
+
+function setRadioByPriceKey(name, pricekey) {
+    var inputs = form.querySelectorAll('input[name="' + name + '"]');
+    inputs.forEach(function(el) {
+        if (el.getAttribute('data-pricekey') === pricekey) {
+            el.checked = true;
+        }
+    });
+}
+
+function updatePrice() {
+    var baseEl = getChecked('base');
+    var bgEl = getChecked('bg');
+    var revEl = getChecked('rev');
+    var comEl = getChecked('commercial');
+    var ddlEl = getChecked('deadline');
+    var payEl = getChecked('pay');
+    
+    var base = Number(baseEl ? baseEl.value : 0);
+    var bg = Number(bgEl ? bgEl.value : 0);
+    var rev = Number(revEl ? revEl.value : 0);
+    var com = parseFloat(comEl ? comEl.value : 0);
+    var ddl = Number(ddlEl ? ddlEl.value : 0);
+    var pay = Number(payEl ? payEl.value : 0);
+    var people = Number(peopleRange.value || 1);
+    
+    var price = 0;
+    // 固定テンプレートの場合（chibi, henyo, clothes, またはfixedSettingsで固定されたもの）
+    if (fixedTemplate) {
+        price = (Number(fixedTemplate.price || 0) + rev);
+        if (com > 0) price *= 1.5;
+    } else {
+        price = (base + bg + rev + ddl + pay);
+        if (com > 0) price *= 1.5;
+    }
+    price *= people;
+    priceEl.textContent = '¥' + price.toLocaleString();
+    
+    // 参考画像
+    var ref = null;
+    // 固定テンプレート（chibi, henyo, clothes）の場合
+    if (fixedTemplate && (fixedTemplate.key === 'chibi' || fixedTemplate.key === 'henyo' || fixedTemplate.key === 'clothes')) {
+        ref = refTable[fixedTemplate.key] || null;
+    }
+    // アナログの場合（固定でなくても専用の参考画像キーを使用）
+    else if (currentTemplateKey === 'analog' && baseEl && bgEl) {
+        var key = 'analog-' + (bgEl.getAttribute('data-bgkey') || 'none') + '-' + (baseEl.getAttribute('data-basekey') || 'face');
+        ref = refTable[key] || null;
+    }
+    // 通常の場合
+    else if (baseEl && bgEl) {
+        var key = (bgEl.getAttribute('data-bgkey') || 'none') + '-' + (baseEl.getAttribute('data-basekey') || 'face');
+        ref = refTable[key] || null;
+    }
+    
+    if (ref) {
+        refImg.innerHTML = '<img src="' + ref + '" alt="参考画像">';
+    } else {
+        refImg.innerHTML = '<span class="no-image">' + i18n[currentLang].no_ref + '</span>';
+    }
+}
+
+// テンプレート
+var currentTemplateKey = 'icon';
+var templates = {
+    icon: function() { 
+        currentTemplateKey = 'icon';
+        setRadioByKey('base', 'face'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0'); setRadioByPriceKey('deadline', 'ddl0'); setRadioByPriceKey('pay', 'pay0'); 
+        fixedTemplate = fixedSettings.icon ? { key: 'icon', price: prices.fixedIcon } : null; 
+    },
+    thumb: function() { 
+        currentTemplateKey = 'thumb';
+        setRadioByKey('base', 'bust'); setRadioByKey('bg', 'much'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0.5'); setRadioByPriceKey('deadline', 'ddl2'); setRadioByPriceKey('pay', 'pay0'); 
+        fixedTemplate = fixedSettings.thumb ? { key: 'thumb', price: prices.fixedThumb } : null; 
+    },
+    char: function() { 
+        currentTemplateKey = 'char';
+        setRadioByKey('base', 'full'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0.5'); setRadioByPriceKey('deadline', 'ddl2'); setRadioByPriceKey('pay', 'pay0'); 
+        fixedTemplate = fixedSettings.char ? { key: 'char', price: prices.fixedChar } : null; 
+    },
+    chibi: function() { 
+        currentTemplateKey = 'chibi';
+        fixedTemplate = fixedSettings.chibi ? { key: 'chibi', price: prices.chibi } : null; 
+        if (!fixedSettings.chibi) {
+            setRadioByKey('base', 'face'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0'); setRadioByPriceKey('deadline', 'ddl0'); setRadioByPriceKey('pay', 'pay0');
+        }
+    },
+    henyo: function() { 
+        currentTemplateKey = 'henyo';
+        fixedTemplate = fixedSettings.henyo ? { key: 'henyo', price: prices.henyo } : null; 
+        if (!fixedSettings.henyo) {
+            setRadioByKey('base', 'face'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0'); setRadioByPriceKey('deadline', 'ddl0'); setRadioByPriceKey('pay', 'pay0');
+        }
+    },
+    clothes: function() { 
+        currentTemplateKey = 'clothes';
+        fixedTemplate = fixedSettings.clothes ? { key: 'clothes', price: prices.clothes } : null; 
+        if (!fixedSettings.clothes) {
+            setRadioByKey('base', 'full'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0'); setRadioByPriceKey('deadline', 'ddl0'); setRadioByPriceKey('pay', 'pay0');
+        }
+    },
+    analog: function() { 
+        currentTemplateKey = 'analog';
+        setRadioByKey('base', 'face'); setRadioByKey('bg', 'none'); setRadioByPriceKey('rev', 'rev0'); setRadio('commercial', '0'); setRadioByPriceKey('deadline', 'ddl2'); setRadioByPriceKey('pay', 'pay0'); 
+        fixedTemplate = fixedSettings.analog ? { key: 'analog', price: prices.fixedAnalog } : null; 
+    }
+};
+
+// 管理者値読み込み
+function loadAdminValues() {
+    document.getElementById('edit-face').value = prices.face;
+    document.getElementById('edit-bust').value = prices.bust;
+    document.getElementById('edit-knees').value = prices.knees;
+    document.getElementById('edit-full').value = prices.full;
+    document.getElementById('edit-bglittle').value = prices.bglittle;
+    document.getElementById('edit-bgmuch').value = prices.bgmuch;
+    document.getElementById('edit-bgfull').value = prices.bgfull;
+    document.getElementById('edit-chibi').value = prices.chibi;
+    document.getElementById('edit-henyo').value = prices.henyo;
+    document.getElementById('edit-clothes').value = prices.clothes;
+    document.getElementById('edit-rev5').value = prices.rev5;
+    document.getElementById('edit-revfree').value = prices.revfree;
+    document.getElementById('edit-ddl1').value = prices.ddl1;
+    document.getElementById('edit-ddl2').value = prices.ddl2;
+    document.getElementById('edit-ddldiscount').value = prices.ddldiscount;
+    document.getElementById('edit-kyash').value = prices.kyash;
+    document.getElementById('edit-paypal').value = prices.paypal;
+    // 固定価格
+    document.getElementById('edit-fixedIcon').value = prices.fixedIcon || 3000;
+    document.getElementById('edit-fixedThumb').value = prices.fixedThumb || 10000;
+    document.getElementById('edit-fixedChar').value = prices.fixedChar || 15000;
+    document.getElementById('edit-fixedAnalog').value = prices.fixedAnalog || 5000;
+    // 固定設定チェックボックス
+    document.getElementById('fixed-icon').checked = fixedSettings.icon;
+    document.getElementById('fixed-thumb').checked = fixedSettings.thumb;
+    document.getElementById('fixed-char').checked = fixedSettings.char;
+    document.getElementById('fixed-chibi').checked = fixedSettings.chibi;
+    document.getElementById('fixed-henyo').checked = fixedSettings.henyo;
+    document.getElementById('fixed-clothes').checked = fixedSettings.clothes;
+    document.getElementById('fixed-analog').checked = fixedSettings.analog;
+    // SNS設定
+    renderSnsSettings();
+}
+
+// イベントリスナー設定
+document.addEventListener('DOMContentLoaded', function() {
+    // タブ切替
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+            // ページ上部にスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+    
+    // 言語切替
+    document.getElementById('langBtn').addEventListener('click', function() {
+        setLanguage(currentLang === 'ja' ? 'en' : 'ja');
+    });
+    
+    // 料金表示トグル
+    document.getElementById('priceToggle').addEventListener('click', function() {
+        showPrices = !showPrices;
+        document.body.classList.toggle('show-prices', showPrices);
+        this.classList.toggle('active', showPrices);
+    });
+    
+    // テンプレートボタン
+    document.getElementById('tplButtons').querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#tplButtons button').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var tpl = btn.getAttribute('data-template');
+            if (templates[tpl]) templates[tpl]();
+            updatePrice();
+        });
+    });
+    
+    // サイズテンプレート
+    document.getElementById('sizeTemplates').querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#sizeTemplates button').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var sizeVal = btn.getAttribute('data-size');
+            var customRow = document.getElementById('customSizeRow');
+            if (sizeVal === 'custom') {
+                customRow.style.display = 'flex';
+                document.getElementById('sizeW').value = '';
+                document.getElementById('sizeH').value = '';
+            } else {
+                customRow.style.display = 'none';
+                var size = sizeVal.split('x');
+                document.getElementById('sizeW').value = size[0];
+                document.getElementById('sizeH').value = size[1];
+            }
+        });
+    });
+    
+    // ラジオボタン変更
+    form.querySelectorAll('input').forEach(function(input) {
+        input.addEventListener('change', updatePrice);
+    });
+    
+    // 人数スライダー
+    peopleRange.addEventListener('input', function() {
+        peopleCount.textContent = peopleRange.value;
+        updatePrice();
+    });
+    
+    // コピーボタン
+    document.getElementById('copyBtn').addEventListener('click', function() {
+        var lang = currentLang;
+        var lines = [];
+        
+        // 使用用途（テンプレート）
+        var activeTemplate = document.querySelector('#tplButtons button.active');
+        var templateName = activeTemplate ? activeTemplate.textContent.trim() : '-';
+        lines.push((lang === 'ja' ? '【使用用途】' : '[Usage]') + ' ' + templateName);
+        
+        // 基本（顔回り/胸上/膝上/全身）
+        var baseEl = getChecked('base');
+        if (baseEl) {
+            var baseLabel = baseEl.parentElement.querySelector('span[data-i18n]');
+            var baseName = baseLabel ? baseLabel.textContent.trim() : '-';
+            lines.push((lang === 'ja' ? '【基本】' : '[Base]') + ' ' + baseName);
+        }
+        
+        // 背景
+        var bgEl = getChecked('bg');
+        if (bgEl) {
+            var bgLabel = bgEl.parentElement.querySelector('span[data-i18n]');
+            var bgName = bgLabel ? bgLabel.textContent.trim() : '-';
+            lines.push((lang === 'ja' ? '【背景】' : '[Background]') + ' ' + bgName);
+        }
+        
+        // 人数
+        lines.push((lang === 'ja' ? '【人数】' : '[People]') + ' ' + peopleRange.value + (lang === 'ja' ? '人' : ''));
+        
+        // リテイク回数
+        var revEl = getChecked('rev');
+        if (revEl) {
+            var revLabel = revEl.parentElement.querySelector('span[data-i18n]');
+            var revName = revLabel ? revLabel.textContent.trim() : '-';
+            lines.push((lang === 'ja' ? '【リテイク回数】' : '[Revisions]') + ' ' + revName);
+        }
+        
+        // 商用利用
+        var comEl = getChecked('commercial');
+        if (comEl) {
+            var comLabel = comEl.parentElement.querySelector('span[data-i18n]');
+            var comName = comLabel ? comLabel.textContent.trim() : '-';
+            lines.push((lang === 'ja' ? '【商用利用】' : '[Commercial]') + ' ' + comName);
+        }
+        
+        // 納期
+        var ddlEl = getChecked('deadline');
+        if (ddlEl) {
+            var ddlLabel = ddlEl.parentElement.querySelector('span[data-i18n]');
+            var ddlName = ddlLabel ? ddlLabel.textContent.trim() : '-';
+            lines.push((lang === 'ja' ? '【納期】' : '[Deadline]') + ' ' + ddlName);
+        }
+        
+        // お支払方法
+        var payEl = getChecked('pay');
+        if (payEl) {
+            var payKey = payEl.getAttribute('data-pricekey');
+            var payName = '';
+            if (payKey === 'pay0') {
+                payName = lang === 'ja' ? '銀行振込' : 'Bank Transfer';
+            } else if (payKey === 'kyash') {
+                payName = 'Kyash (+' + prices.kyash + (lang === 'ja' ? '円)' : ' JPY)');
+            } else if (payKey === 'paypal') {
+                payName = 'PayPal (+' + prices.paypal + (lang === 'ja' ? '円)' : ' JPY)');
+            } else {
+                payName = payEl.parentElement.textContent.split('(')[0].trim();
+            }
+            lines.push((lang === 'ja' ? '【お支払方法】' : '[Payment]') + ' ' + payName);
+        }
+        
+        // 納品形式
+        var delivery = document.getElementById('delivery').value;
+        lines.push((lang === 'ja' ? '【納品形式】' : '[Format]') + ' ' + delivery);
+        
+        // イラストサイズ
+        var h = document.getElementById('sizeH').value;
+        var w = document.getElementById('sizeW').value;
+        var sizeText = (w && h) ? (w + ' x ' + h + 'px') : (lang === 'ja' ? '標準サイズ' : 'Default size');
+        lines.push((lang === 'ja' ? '【イラストサイズ】' : '[Size]') + ' ' + sizeText);
+        
+        // 備考
+        var note = document.getElementById('note').value;
+        if (note) {
+            lines.push((lang === 'ja' ? '【備考】' : '[Notes]') + ' ' + note);
+        }
+        
+        // 見積もり金額
+        lines.push('');
+        lines.push((lang === 'ja' ? '💰 概算見積もり: ' : '💰 Estimate: ') + priceEl.textContent);
+        
+        var text = lines.join('\n');
+        
+        // クリップボードにコピー
+        navigator.clipboard.writeText(text).then(function() {
+            // メール送信の確認
+            var confirmMsg = lang === 'ja' 
+                ? 'コピーしました！\n\nこのままメールで依頼を送信しますか？\n（メールアプリが開きます）' 
+                : 'Copied!\n\nWould you like to send this request via email?\n(Your email app will open)';
+            
+            if (confirm(confirmMsg)) {
+                // メール本文を作成
+                var emailSubject = lang === 'ja' 
+                    ? 'イラスト依頼のご相談 - ' + templateName 
+                    : 'Illustration Request - ' + templateName;
+                
+                var emailBody = lang === 'ja' 
+                    ? 'fiorella様\n\nはじめまして。イラストのご依頼についてご相談させていただきたくご連絡いたしました。\n\n以下の内容でお見積りをお願いできますでしょうか。\n\n' + '─'.repeat(20) + '\n\n' + text + '\n\n' + '─'.repeat(20) + '\n\nお忙しいところ恐れ入りますが、ご確認いただけますと幸いです。\nどうぞよろしくお願いいたします。\n\n【お名前】\n【連絡先（Twitter/メール等）】'
+                    : 'Dear fiorella,\n\nI am reaching out to inquire about commissioning an illustration.\n\nCould you please provide a quote for the following?\n\n' + '-'.repeat(30) + '\n\n' + text + '\n\n' + '-'.repeat(30) + '\n\nThank you for your time and consideration.\nI look forward to hearing from you.\n\n[Your Name]\n[Contact (Twitter/Email)]';
+                
+                // Gmail の作成画面を開く
+                var gmailLink = 'https://mail.google.com/mail/?view=cm&fs=1&to=nekonokathu0@gmail.com&su=' + encodeURIComponent(emailSubject) + '&body=' + encodeURIComponent(emailBody);
+                window.open(gmailLink, '_blank');
+            }
+        });
+    });
+    
+    // 管理者ログイン - プロフィールアイコントリプルクリック + Ctrl+Shift+A
+    document.getElementById('profileIcon').addEventListener('click', function() {
+        tripleClickCount++;
+        clearTimeout(tripleClickTimer);
+        tripleClickTimer = setTimeout(function() {
+            tripleClickCount = 0;
+            awaitingKeyCombo = false;
+        }, 800);
+        
+        if (tripleClickCount >= 3) {
+            tripleClickCount = 0;
+            awaitingKeyCombo = true;
+            clearTimeout(keyComboTimer);
+            keyComboTimer = setTimeout(function() {
+                awaitingKeyCombo = false;
+            }, 3000);
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (awaitingKeyCombo && e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+            e.preventDefault();
+            awaitingKeyCombo = false;
+            if (isAdmin) {
+                document.getElementById('adminModal').classList.add('active');
+                loadAdminValues();
+            } else {
+                document.getElementById('passwordModal').classList.add('active');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+    });
+    
+    // 管理者インジケータクリック
+    document.getElementById('adminIndicator').addEventListener('click', function() {
+        document.getElementById('adminModal').classList.add('active');
+        loadAdminValues();
+    });
+    
+    // パスワードモーダル
+    document.getElementById('cancelLogin').addEventListener('click', function() {
+        document.getElementById('passwordModal').classList.remove('active');
+    });
+    
+    document.getElementById('confirmLogin').addEventListener('click', function() {
+        var password = document.getElementById('adminPassword').value;
+        if (password === 'fiorella2024') {
+            isAdmin = true;
+            document.getElementById('passwordModal').classList.remove('active');
+            document.getElementById('adminIndicator').classList.add('active');
+            document.getElementById('adminModal').classList.add('active');
+            loadAdminValues();
+            alert(i18n[currentLang].login_success);
+        } else {
+            alert(i18n[currentLang].login_fail);
+        }
+    });
+    
+    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') document.getElementById('confirmLogin').click();
+    });
+    
+    // 管理者モーダル
+    document.getElementById('cancelAdmin').addEventListener('click', function() {
+        document.getElementById('adminModal').classList.remove('active');
+    });
+    
+    document.getElementById('saveAdmin').addEventListener('click', function() {
+        var getVal = function(id, def) {
+            var v = document.getElementById(id).value;
+            return v === '' ? def : Number(v);
+        };
+        prices.face = getVal('edit-face', DEFAULT_PRICES.face);
+        prices.bust = getVal('edit-bust', DEFAULT_PRICES.bust);
+        prices.knees = getVal('edit-knees', DEFAULT_PRICES.knees);
+        prices.full = getVal('edit-full', DEFAULT_PRICES.full);
+        prices.bglittle = getVal('edit-bglittle', DEFAULT_PRICES.bglittle);
+        prices.bgmuch = getVal('edit-bgmuch', DEFAULT_PRICES.bgmuch);
+        prices.bgfull = getVal('edit-bgfull', DEFAULT_PRICES.bgfull);
+        prices.chibi = getVal('edit-chibi', DEFAULT_PRICES.chibi);
+        prices.henyo = getVal('edit-henyo', DEFAULT_PRICES.henyo);
+        prices.clothes = getVal('edit-clothes', DEFAULT_PRICES.clothes);
+        prices.rev5 = getVal('edit-rev5', DEFAULT_PRICES.rev5);
+        prices.revfree = getVal('edit-revfree', DEFAULT_PRICES.revfree);
+        prices.ddl1 = getVal('edit-ddl1', DEFAULT_PRICES.ddl1);
+        prices.ddl2 = getVal('edit-ddl2', DEFAULT_PRICES.ddl2);
+        prices.ddldiscount = getVal('edit-ddldiscount', DEFAULT_PRICES.ddldiscount);
+        prices.kyash = getVal('edit-kyash', DEFAULT_PRICES.kyash);
+        prices.paypal = getVal('edit-paypal', DEFAULT_PRICES.paypal);
+        // 固定価格
+        prices.fixedIcon = getVal('edit-fixedIcon', DEFAULT_PRICES.fixedIcon);
+        prices.fixedThumb = getVal('edit-fixedThumb', DEFAULT_PRICES.fixedThumb);
+        prices.fixedChar = getVal('edit-fixedChar', DEFAULT_PRICES.fixedChar);
+        prices.fixedAnalog = getVal('edit-fixedAnalog', DEFAULT_PRICES.fixedAnalog);
+        
+        // 固定設定
+        fixedSettings.icon = document.getElementById('fixed-icon').checked;
+        fixedSettings.thumb = document.getElementById('fixed-thumb').checked;
+        fixedSettings.char = document.getElementById('fixed-char').checked;
+        fixedSettings.chibi = document.getElementById('fixed-chibi').checked;
+        fixedSettings.henyo = document.getElementById('fixed-henyo').checked;
+        fixedSettings.clothes = document.getElementById('fixed-clothes').checked;
+        fixedSettings.analog = document.getElementById('fixed-analog').checked;
+        
+        localStorage.setItem('fio_prices', JSON.stringify(prices));
+        localStorage.setItem('fio_fixedSettings', JSON.stringify(fixedSettings));
+        saveSnsData();
+        renderSnsCards();
+        updatePriceDisplay();
+        
+        // 現在のテンプレートを再適用して更新
+        if (templates[currentTemplateKey]) {
+            templates[currentTemplateKey]();
+        }
+        updatePrice();
+        document.getElementById('adminModal').classList.remove('active');
+        alert(i18n[currentLang].save_success);
+    });
+    
+    // 実績追加ボタン
+    document.getElementById('addGalleryBtn').addEventListener('click', function() {
+        var imageUrl = document.getElementById('add-gallery-image').value.trim();
+        var linkUrl = document.getElementById('add-gallery-link').value.trim();
+        
+        if (!imageUrl || !linkUrl) {
+            alert('画像URLとリンク先URLの両方を入力してください');
+            return;
+        }
+        
+        // 先頭に追加
+        GALLERY_DATA.unshift({ image: imageUrl, link: linkUrl });
+        saveGalleryData();
+        renderGallery();
+        
+        // 入力欄をクリア
+        document.getElementById('add-gallery-image').value = '';
+        document.getElementById('add-gallery-link').value = '';
+        
+        alert('実績を追加しました！');
+    });
+    
+    // SNS追加ボタン
+    document.getElementById('addSnsBtn').addEventListener('click', function() {
+        var newSns = {
+            id: 'sns_' + Date.now(),
+            name: '新しいSNS',
+            url: 'https://example.com',
+            icon: 'https://via.placeholder.com/48',
+            color: '#888888'
+        };
+        SNS_DATA.push(newSns);
+        renderSnsSettings();
+    });
+    
+    // 実績管理モーダル用の選択状態
+    var selectedForDelete = [];
+    
+    // 実績管理ボタン
+    document.getElementById('manageGalleryBtn').addEventListener('click', function() {
+        selectedForDelete = [];
+        renderGalleryManageGrid();
+        document.getElementById('galleryManageModal').classList.add('active');
+    });
+    
+    // 実績管理グリッド描画
+    function renderGalleryManageGrid() {
+        var grid = document.getElementById('gallery-manage-grid');
+        grid.innerHTML = '';
+        
+        GALLERY_DATA.forEach(function(item, idx) {
+            var wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:relative; aspect-ratio:1; cursor:pointer;';
+            wrapper.dataset.index = idx;
+            
+            var img = document.createElement('img');
+            img.src = item.image;
+            img.style.cssText = 'width:100%; height:100%; object-fit:cover; border-radius:8px; border:3px solid transparent; transition:all 0.2s;';
+            
+            var check = document.createElement('div');
+            check.style.cssText = 'position:absolute; top:4px; right:4px; width:24px; height:24px; background:#e74c3c; color:white; border-radius:50%; display:none; align-items:center; justify-content:center; font-size:14px; font-weight:bold;';
+            check.textContent = '✓';
+            
+            if (selectedForDelete.includes(idx)) {
+                img.style.borderColor = '#e74c3c';
+                img.style.opacity = '0.6';
+                check.style.display = 'flex';
+            }
+            
+            wrapper.addEventListener('click', function() {
+                var i = selectedForDelete.indexOf(idx);
+                if (i > -1) {
+                    selectedForDelete.splice(i, 1);
+                    img.style.borderColor = 'transparent';
+                    img.style.opacity = '1';
+                    check.style.display = 'none';
+                } else {
+                    selectedForDelete.push(idx);
+                    img.style.borderColor = '#e74c3c';
+                    img.style.opacity = '0.6';
+                    check.style.display = 'flex';
+                }
+            });
+            
+            wrapper.appendChild(img);
+            wrapper.appendChild(check);
+            grid.appendChild(wrapper);
+        });
+    }
+    
+    // 全選択
+    document.getElementById('selectAllGallery').addEventListener('click', function() {
+        selectedForDelete = GALLERY_DATA.map(function(_, i) { return i; });
+        renderGalleryManageGrid();
+    });
+    
+    // 選択解除
+    document.getElementById('deselectAllGallery').addEventListener('click', function() {
+        selectedForDelete = [];
+        renderGalleryManageGrid();
+    });
+    
+    // デフォルトに戻す
+    document.getElementById('resetGalleryDefault').addEventListener('click', function() {
+        if (confirm('実績をデフォルトに戻しますか？追加・削除した変更はすべてリセットされます。')) {
+            GALLERY_DATA = JSON.parse(JSON.stringify(DEFAULT_GALLERY_DATA));
+            saveGalleryData();
+            renderGallery();
+            selectedForDelete = [];
+            renderGalleryManageGrid();
+            alert('デフォルトに戻しました！');
+        }
+    });
+    
+    // 選択した実績を削除
+    document.getElementById('deleteSelectedGallery').addEventListener('click', function() {
+        if (selectedForDelete.length === 0) {
+            alert('削除する実績を選択してください');
+            return;
+        }
+        
+        if (confirm(selectedForDelete.length + '件の実績を削除しますか？')) {
+            // インデックスを降順にソートして削除（インデックスずれ防止）
+            selectedForDelete.sort(function(a, b) { return b - a; });
+            selectedForDelete.forEach(function(idx) {
+                GALLERY_DATA.splice(idx, 1);
+            });
+            saveGalleryData();
+            renderGallery();
+            selectedForDelete = [];
+            renderGalleryManageGrid();
+            alert('削除しました！');
+        }
+    });
+    
+    // 実績管理モーダルキャンセル
+    document.getElementById('cancelGalleryManage').addEventListener('click', function() {
+        document.getElementById('galleryManageModal').classList.remove('active');
+    });
+    
+    // 参考画像設定 - 組み合わせ選択時のプレビュー
+    document.getElementById('ref-select-key').addEventListener('change', function() {
+        var key = this.value;
+        var preview = document.getElementById('current-ref-preview');
+        
+        if (!key) {
+            preview.innerHTML = '<span style="color:#999; font-size:12px;">組み合わせを選択してください</span>';
+            return;
+        }
+        
+        var currentUrl = refTable[key];
+        if (currentUrl) {
+            preview.innerHTML = '<img src="' + currentUrl + '" style="max-width:100%; max-height:100px; border-radius:8px;"><div style="font-size:11px; color:#666; margin-top:4px; word-break:break-all;">' + currentUrl.substring(0, 50) + '...</div>';
+        } else {
+            preview.innerHTML = '<span style="color:#999; font-size:12px;">未設定</span>';
+        }
+    });
+    
+    // 実績から選択ボタン
+    document.getElementById('selectFromGalleryBtn').addEventListener('click', function() {
+        var key = document.getElementById('ref-select-key').value;
+        if (!key) {
+            alert('先に組み合わせを選択してください');
+            return;
+        }
+        
+        var grid = document.getElementById('gallery-select-grid');
+        grid.innerHTML = '';
+        
+        GALLERY_DATA.forEach(function(item) {
+            var img = document.createElement('img');
+            img.src = item.image;
+            img.style.cssText = 'width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer; border:3px solid transparent; transition:all 0.2s;';
+            img.addEventListener('click', function() {
+                document.getElementById('ref-direct-url').value = item.image;
+                document.getElementById('gallerySelectModal').classList.remove('active');
+            });
+            img.addEventListener('mouseenter', function() { this.style.borderColor = 'var(--accent)'; this.style.transform = 'scale(1.05)'; });
+            img.addEventListener('mouseleave', function() { this.style.borderColor = 'transparent'; this.style.transform = ''; });
+            grid.appendChild(img);
+        });
+        
+        document.getElementById('gallerySelectModal').classList.add('active');
+    });
+    
+    // 実績選択モーダルキャンセル
+    document.getElementById('cancelGallerySelect').addEventListener('click', function() {
+        document.getElementById('gallerySelectModal').classList.remove('active');
+    });
+    
+    // 参考画像設定ボタン
+    document.getElementById('setRefImageBtn').addEventListener('click', function() {
+        var key = document.getElementById('ref-select-key').value;
+        var url = document.getElementById('ref-direct-url').value.trim();
+        
+        if (!key) {
+            alert('組み合わせを選択してください');
+            return;
+        }
+        
+        // 空の場合はnullを設定（参考画像を削除）
+        refTable[key] = url || null;
+        saveRefTable();
+        updatePrice();
+        
+        // プレビュー更新
+        var preview = document.getElementById('current-ref-preview');
+        if (url) {
+            preview.innerHTML = '<img src="' + url + '" style="max-width:100%; max-height:100px; border-radius:8px;"><div style="font-size:11px; color:#666; margin-top:4px; word-break:break-all;">' + url.substring(0, 50) + '...</div>';
+        } else {
+            preview.innerHTML = '<span style="color:#999; font-size:12px;">未設定</span>';
+        }
+        
+        document.getElementById('ref-direct-url').value = '';
+        alert('参考画像を' + (url ? '設定' : '削除') + 'しました！');
+    });
+    
+    // 初期化
+    loadGalleryData();
+    loadRefTable();
+    loadSnsData();
+    loadPrices();
+    renderGallery();
+    renderSnsCards();
+    templates.icon();
+    updatePrice();
+});
+</script>
+</body>
+</html>
